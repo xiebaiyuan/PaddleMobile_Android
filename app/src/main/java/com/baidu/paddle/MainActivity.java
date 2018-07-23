@@ -100,7 +100,7 @@ public class MainActivity extends Activity {
             public void onClick(View view) {
                 Bitmap scaleBitmap = getScaleBitmap(
                         MainActivity.this,
-                        getApple().getPath()
+                        getBanana().getPath()
                 );
 
                 imageView.setImageBitmap(scaleBitmap);
