@@ -14,8 +14,8 @@ import java.io.File
 class MobileNetModelLoaderImpl : ModelLoader() {
 
     private var type = ModelType.mobilenet
-
-    private val means = floatArrayOf(123.68f, 116.78f, 103.94f)
+    // mobile net is bgr
+    private val means = floatArrayOf(103.94f, 116.78f, 123.68f)
     private val ddims = intArrayOf(1, 3, 224, 224)
     private val scale = 0.017f
 //   b g r
@@ -34,9 +34,9 @@ class MobileNetModelLoaderImpl : ModelLoader() {
 
     override fun getScaledMatrix(bitmap: Bitmap, desWidth: Int, desHeight: Int): FloatArray {
         val dataBuf = FloatArray(3 * desWidth * desHeight)
-        var rIndex: Int
-        var gIndex: Int
-        var bIndex: Int
+        var firtChannel: Int
+        var secountChannel: Int
+        var thirdChannel: Int
         val pixels = IntArray(desWidth * desHeight)
         val bm = Bitmap.createScaledBitmap(bitmap, desWidth, desHeight, false)
         bm.getPixels(pixels, 0, desWidth, 0, 0, desWidth, desHeight)
@@ -45,14 +45,21 @@ class MobileNetModelLoaderImpl : ModelLoader() {
         for (i in pixels.indices) {
             val clr = pixels[i]
 //            Log.d("plm","clr= "+String.format("%#x\n",clr))
+
             j = i / desHeight
             k = i % desWidth
-            rIndex = j * desWidth + k
-            gIndex = rIndex + desHeight * desWidth
-            bIndex = gIndex + desHeight * desWidth
-            dataBuf[rIndex] = (((clr and 0x00ff0000) shr 16).toFloat() - means[0]) * scale
-            dataBuf[gIndex] = (((clr and 0x0000ff00) shr 8).toFloat() - means[1]) * scale
-            dataBuf[bIndex] = (((clr and 0x000000ff)).toFloat() - means[2]) * scale
+            firtChannel = j * desWidth + k
+            secountChannel = firtChannel + desHeight * desWidth
+            thirdChannel = secountChannel + desHeight * desWidth
+
+            val r = (((clr and 0x00ff0000) shr 16).toFloat() - means[2]) * scale
+            val g = (((clr and 0x0000ff00) shr 8).toFloat() - means[1]) * scale
+            val b = (((clr and 0x000000ff)).toFloat() - means[0]) * scale
+
+            //  mobilenet  is bgr
+            dataBuf[firtChannel] = b
+            dataBuf[secountChannel] = g
+            dataBuf[thirdChannel] = r
 
         }
         if (bm.isRecycled) {
