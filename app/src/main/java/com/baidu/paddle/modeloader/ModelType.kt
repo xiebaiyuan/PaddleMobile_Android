@@ -6,5 +6,6 @@ package com.baidu.paddle.modeloader
  */
 enum class ModelType {
     googlenet,
-    mobilenet
+    mobilenet,
+    mobilenet_ssd_new
 }

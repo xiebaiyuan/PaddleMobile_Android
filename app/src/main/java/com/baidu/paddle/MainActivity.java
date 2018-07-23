@@ -35,7 +35,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.baidu.paddle.modeloader.MobileNetModelLoaderImpl;
+import com.baidu.paddle.modeloader.MobileNetSSDModelLoaderImpl;
 import com.baidu.paddle.modeloader.ModelLoader;
 
 import java.io.BufferedWriter;
@@ -86,7 +86,7 @@ public class MainActivity extends Activity {
         mContext = this;
         setContentView(R.layout.main_activity);
 
-        loader = new MobileNetModelLoaderImpl();
+        loader = new MobileNetSSDModelLoaderImpl();
         init();
     }
 
@@ -100,7 +100,7 @@ public class MainActivity extends Activity {
             public void onClick(View view) {
                 Bitmap scaleBitmap = getScaleBitmap(
                         MainActivity.this,
-                        getBanana().getPath()
+                        getHand().getPath()
                 );
 
                 imageView.setImageBitmap(scaleBitmap);
@@ -113,6 +113,8 @@ public class MainActivity extends Activity {
 
                 float sum = 0;
                 if (result != null) {
+                    Log.d("pml", "result.length: " + result.length);
+
                     for (int i = 0; i < result.length; ++i) {
                         Log.d("pml: ", " index: " + i + " value: " + result[i]);
                         sum += result[i];
@@ -182,6 +184,21 @@ public class MainActivity extends Activity {
         }
         return tempFile;
     }
+
+
+    private File getHand() {
+        String assetPath = "pml_demo";
+        String imagePath = Environment.getExternalStorageDirectory()
+                + File.separator + assetPath;
+        File tempFile = new File(imagePath, "hand.jpg");
+        try {
+            tempFile.createNewFile();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return tempFile;
+    }
+
 
     private File getApple() {
         String assetPath = "pml_demo";
