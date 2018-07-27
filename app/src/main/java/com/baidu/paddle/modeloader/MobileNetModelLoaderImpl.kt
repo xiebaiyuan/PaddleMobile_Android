@@ -33,40 +33,32 @@ class MobileNetModelLoaderImpl : ModelLoader() {
 //    input_dim: 224
 
     override fun getScaledMatrix(bitmap: Bitmap, desWidth: Int, desHeight: Int): FloatArray {
+        val rsGsBs = getRsGsBs(bitmap, desWidth, desHeight)
+
+        val rs = rsGsBs.first
+        val gs = rsGsBs.second
+        val bs = rsGsBs.third
+
         val dataBuf = FloatArray(3 * desWidth * desHeight)
-        var firtChannel: Int
-        var secountChannel: Int
-        var thirdChannel: Int
-        val pixels = IntArray(desWidth * desHeight)
-        val bm = Bitmap.createScaledBitmap(bitmap, desWidth, desHeight, false)
-        bm.getPixels(pixels, 0, desWidth, 0, 0, desWidth, desHeight)
-        var j = 0
-        var k = 0
-        for (i in pixels.indices) {
-            val clr = pixels[i]
-//            Log.d("plm","clr= "+String.format("%#x\n",clr))
 
-            j = i / desHeight
-            k = i % desWidth
-            firtChannel = j * desWidth + k
-            secountChannel = firtChannel + desHeight * desWidth
-            thirdChannel = secountChannel + desHeight * desWidth
-
-            val r = (((clr and 0x00ff0000) shr 16).toFloat() - means[2]) * scale
-            val g = (((clr and 0x0000ff00) shr 8).toFloat() - means[1]) * scale
-            val b = (((clr and 0x000000ff)).toFloat() - means[0]) * scale
-
-            //  mobilenet  is bgr
-            dataBuf[firtChannel] = b
-            dataBuf[secountChannel] = g
-            dataBuf[thirdChannel] = r
-
+        if (rs.size + gs.size + bs.size != dataBuf.size) {
+            throw IllegalArgumentException("不可能吧老铁?")
         }
-        if (bm.isRecycled) {
-            bm.recycle()
+
+        // bbbb... gggg.... rrrr...
+        for (i in dataBuf.indices) {
+            dataBuf[i] = when {
+                i < bs.size -> (bs[i] - means[0]) * scale
+                i < bs.size + gs.size -> (gs[i - bs.size] - means[1]) * scale
+                else -> (rs[i - bs.size - rs.size] - means[2]) * scale
+            }
         }
+
         return dataBuf
     }
+
+
+
 
     override fun getInputSize(): Int {
         return 224

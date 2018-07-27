@@ -48,12 +48,13 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="clear" />
+
         <Button
             android:id="@+id/predict_banada"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="predict_apple" />
+            android:text="predict" />
     </LinearLayout>
 
     <ImageView

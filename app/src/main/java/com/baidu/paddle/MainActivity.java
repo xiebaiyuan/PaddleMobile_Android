@@ -17,6 +17,7 @@
  */
 package com.baidu.paddle;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -36,6 +37,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.baidu.paddle.modeloader.MobileNetModelLoaderImpl;
+import com.baidu.paddle.modeloader.MobileNetSSDModelLoaderImpl;
 import com.baidu.paddle.modeloader.ModelLoader;
 
 import java.io.BufferedWriter;
@@ -44,7 +46,6 @@ import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
-
 
 
 public class MainActivity extends Activity {
@@ -98,40 +99,7 @@ public class MainActivity extends Activity {
         btnBanana.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Bitmap scaleBitmap = getScaleBitmap(
-                        MainActivity.this,
-                        getBanana().getPath()
-                );
-
-                imageView.setImageBitmap(scaleBitmap);
-                float[] result = loader.predictImage(
-                        scaleBitmap
-                );
-
-                float max = Float.MIN_VALUE;
-                int maxi = -1;
-
-                float sum = 0;
-                if (result != null) {
-                    Log.d("pml", "result.length: " + result.length);
-
-                    for (int i = 0; i < result.length; ++i) {
-                        Log.d("pml: ", " index: " + i + " value: " + result[i]);
-                        sum += result[i];
-                        if (result[i] > max) {
-                            max = result[i];
-                            maxi = i;
-                        }
-                    }
-                }
-
-                Log.d("pml", "maxindex: " + maxi);
-                Log.d("pml", "max: " + max);
-                Log.d("pml", "sum: " + sum);
-                tvSpeed.setText("detection cost：" + loader.getPredictImageTime() + "ms");
-
-                Toast.makeText(mContext, "maxindex: " + maxi + " max: " + max, Toast.LENGTH_SHORT).show();
-
+                scaleImageAndPredictImage();
             }
         });
         button.setOnClickListener(new View.OnClickListener() {
@@ -170,6 +138,45 @@ public class MainActivity extends Activity {
         copyFilesFromAssets(this, assetPath, sdcardPath);
 
 
+    }
+
+    /**
+     * 缩放然后predict这张图片
+     */
+    @SuppressLint("SetTextI18n")
+    private void scaleImageAndPredictImage() {
+        Bitmap scaleBitmap = getScaleBitmap(
+                MainActivity.this,
+                getBanana().getPath()
+        );
+
+        imageView.setImageBitmap(scaleBitmap);
+        float[] result = loader.predictImage(
+                scaleBitmap
+        );
+
+        float max = Float.MIN_VALUE;
+        int maxi = -1;
+
+        float sum = 0;
+        if (result != null) {
+            Log.d("pml", "result.length: " + result.length);
+
+            for (int i = 0; i < result.length; ++i) {
+                Log.d("pml: ", " index: " + i + " value: " + result[i]);
+                sum += result[i];
+                if (result[i] > max) {
+                    max = result[i];
+                    maxi = i;
+                }
+            }
+        }
+
+        Log.d("pml", "maxindex: " + maxi);
+        Log.d("pml", "max: " + max);
+        Log.d("pml", "sum: " + sum);
+        tvSpeed.setText("detection cost：" + loader.getPredictImageTime() + "ms");
+        Toast.makeText(mContext, "maxindex: " + maxi + " max: " + max, Toast.LENGTH_SHORT).show();
     }
 
     private File getBanana() {
