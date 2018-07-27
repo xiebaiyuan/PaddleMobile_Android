@@ -35,7 +35,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.baidu.paddle.modeloader.MobileNetSSDModelLoaderImpl;
+import com.baidu.paddle.modeloader.MobileNetModelLoaderImpl;
 import com.baidu.paddle.modeloader.ModelLoader;
 
 import java.io.BufferedWriter;
@@ -86,7 +86,7 @@ public class MainActivity extends Activity {
         mContext = this;
         setContentView(R.layout.main_activity);
 
-        loader = new MobileNetSSDModelLoaderImpl();
+        loader = new MobileNetModelLoaderImpl();
         init();
     }
 
@@ -100,7 +100,7 @@ public class MainActivity extends Activity {
             public void onClick(View view) {
                 Bitmap scaleBitmap = getScaleBitmap(
                         MainActivity.this,
-                        getHand().getPath()
+                        getBanana().getPath()
                 );
 
                 imageView.setImageBitmap(scaleBitmap);
@@ -199,6 +199,18 @@ public class MainActivity extends Activity {
         return tempFile;
     }
 
+    private File getHand2() {
+        String assetPath = "pml_demo";
+        String imagePath = Environment.getExternalStorageDirectory()
+                + File.separator + assetPath;
+        File tempFile = new File(imagePath, "hand2.jpg");
+        try {
+            tempFile.createNewFile();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return tempFile;
+    }
 
     private File getApple() {
         String assetPath = "pml_demo";
@@ -231,15 +243,29 @@ public class MainActivity extends Activity {
         int bmpWidth = opt.outWidth;
         int bmpHeight = opt.outHeight;
 
-        int maxSize = loader.getInputSize();
+        int maxSize = loader.getInputSize() * 2;
 
         opt.inSampleSize = 1;
         while (true) {
-            if (bmpWidth / opt.inSampleSize < maxSize || bmpHeight / opt.inSampleSize < maxSize) {
+            if (bmpWidth / opt.inSampleSize <= maxSize || bmpHeight / opt.inSampleSize <= maxSize) {
                 break;
             }
             opt.inSampleSize *= 2;
         }
+        opt.inJustDecodeBounds = false;
+        return BitmapFactory.decodeFile(filePath, opt);
+    }
+
+    /**
+     * scale bitmap in case of OOM
+     *
+     * @param ctx
+     * @param filePath
+     * @return
+     */
+    public Bitmap getBitmap(Context ctx, String filePath) {
+        Log.d(TAG, "getScaleBitmap: filePath: " + filePath);
+        BitmapFactory.Options opt = new BitmapFactory.Options();
         opt.inJustDecodeBounds = false;
         return BitmapFactory.decodeFile(filePath, opt);
     }
