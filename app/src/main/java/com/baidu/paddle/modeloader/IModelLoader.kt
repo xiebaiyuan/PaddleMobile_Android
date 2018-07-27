@@ -17,9 +17,9 @@ interface IModelLoader {
 
     fun getScaledMatrix(bitmap: Bitmap, desWidth: Int, desHeight: Int): FloatArray
 
-    fun predictImage(floatArray: FloatArray): FloatArray?
+    fun predictImage(inputBuf: FloatArray): FloatArray?
 
-    fun drawRect(canvas: Canvas, floatArray: FloatArray, width: Int, height: Int)
+    fun drawRect(canvas: Canvas, predicted: FloatArray, viewWidth: Int, viewHeight: Int)
 
     fun predictImage(bitmap: Bitmap): FloatArray?
 

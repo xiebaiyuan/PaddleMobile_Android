@@ -3,6 +3,7 @@ package com.baidu.paddle.modeloader
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.os.Environment
+import android.widget.Toast
 import com.baidu.paddle.PML
 import java.io.File
 
@@ -76,11 +77,11 @@ class MobileNetModelLoaderImpl : ModelLoader() {
         PML.load(sdcardPath)
     }
 
-    override fun predictImage(buf: FloatArray): FloatArray? {
+    override fun predictImage(inputBuf: FloatArray): FloatArray? {
         var predictImage: FloatArray? = null
         try {
             val start = System.currentTimeMillis()
-            predictImage = PML.predictImage(buf, ddims)
+            predictImage = PML.predictImage(inputBuf, ddims)
             val end = System.currentTimeMillis()
             predictImageTime = end - start
         } catch (e: Exception) {
@@ -89,8 +90,7 @@ class MobileNetModelLoaderImpl : ModelLoader() {
     }
 
     override fun predictImage(bitmap: Bitmap): FloatArray? {
-        val buf = getScaledMatrix(bitmap, getInputSize(), getInputSize())
-        return predictImage(buf)
+        return predictImage(getScaledMatrix(bitmap, getInputSize(), getInputSize()))
     }
 
 

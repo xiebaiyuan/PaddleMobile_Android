@@ -82,11 +82,11 @@ class MobileNetSSDModelLoaderImpl : ModelLoader() {
         PML.loadCombined(modelPath, paramsPath)
     }
 
-    override fun predictImage(buf: FloatArray): FloatArray? {
+    override fun predictImage(inputBuf: FloatArray): FloatArray? {
         var predictImage: FloatArray? = null
         try {
             val start = System.currentTimeMillis()
-            predictImage = PML.predictImage(buf, ddims)
+            predictImage = PML.predictImage(inputBuf, ddims)
             val end = System.currentTimeMillis()
             predictImageTime = end - start
         } catch (e: Exception) {
