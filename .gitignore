@@ -90,3 +90,5 @@ src/test/
 release/
 /app/src/main/assets/*
 
+/gradlew.bat
+app/src/main/assets.zip

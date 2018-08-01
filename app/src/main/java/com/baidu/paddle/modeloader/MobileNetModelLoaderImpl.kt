@@ -51,7 +51,7 @@ class MobileNetModelLoaderImpl : ModelLoader() {
             dataBuf[i] = when {
                 i < bs.size -> (bs[i] - means[0]) * scale
                 i < bs.size + gs.size -> (gs[i - bs.size] - means[1]) * scale
-                else -> (rs[i - bs.size - rs.size] - means[2]) * scale
+                else -> (rs[i - bs.size - gs.size] - means[2]) * scale
             }
         }
 
@@ -62,7 +62,7 @@ class MobileNetModelLoaderImpl : ModelLoader() {
 
 
     override fun getInputSize(): Int {
-        return 224
+        return ddims[2]
     }
 
 

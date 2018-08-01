@@ -23,7 +23,7 @@ class GoogleNetModelLoaderImpl : ModelLoader() {
 
 
     override fun getInputSize(): Int {
-        return 224
+        return ddims[2]
     }
 
 
@@ -57,7 +57,7 @@ class GoogleNetModelLoaderImpl : ModelLoader() {
             dataBuf[i] = when {
                 i < rs.size -> (rs[i] - means[0]) * scale
                 i < rs.size + gs.size -> (gs[i - rs.size] - means[1]) * scale
-                else -> (bs[i - rs.size - bs.size] - means[2]) * scale
+                else -> (bs[i - rs.size - gs.size] - means[2]) * scale
             }
         }
         return dataBuf
