@@ -36,8 +36,10 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.baidu.paddle.modeloader.GoogleNetModelCombinedLoaderImpl;
+import com.baidu.paddle.modeloader.GoogleNetModelLoaderCombinedQualifiedImpl;
 import com.baidu.paddle.modeloader.MobileNetModelLoaderImpl;
-import com.baidu.paddle.modeloader.MobileNetSSDModelLoaderImpl;
+import com.baidu.paddle.modeloader.MobileNetModelLoaderQualifiedImpl;
 import com.baidu.paddle.modeloader.ModelLoader;
 
 import java.io.BufferedWriter;
@@ -53,7 +55,8 @@ public class MainActivity extends Activity {
 
     private Context mContext = null;
 
-    private ModelLoader loader;
+    private ModelLoader loader = new GoogleNetModelCombinedLoaderImpl();
+    ;
 
     private Button btnBanana;
 
@@ -86,8 +89,6 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         mContext = this;
         setContentView(R.layout.main_activity);
-
-        loader = new MobileNetModelLoaderImpl();
         init();
     }
 

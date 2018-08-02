@@ -18,6 +18,22 @@ public class PML {
 
 
     /**
+     * Load seperated Qualified parameters
+     * @param modelDir
+     * @return
+     */
+    public static native boolean loadQualified(String modelDir);
+
+    /**
+     * Load combined Qualified parameters
+     * @param modelPath
+     * @param paramPath
+     * @return
+     */
+    public static native boolean loadCombinedQualified(String modelPath,String paramPath);
+
+
+    /**
      * object detection
      *
      * @param buf

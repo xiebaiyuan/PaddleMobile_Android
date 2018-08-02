@@ -3,7 +3,7 @@ package com.baidu.paddle.modeloader
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.os.Environment
-import android.util.Log
+import android.widget.Toast
 import com.baidu.paddle.PML
 import java.io.File
 
@@ -12,13 +12,13 @@ import java.io.File
  * Created by xiebaiyuan on 2018/7/18.
  */
 
-class MobileNetSSDModelLoaderImpl : ModelLoader() {
+class MobileNetModelLoaderQualifiedImpl : ModelLoader() {
 
-    private var type = ModelType.mobilenet_ssd_new
+    private var type = ModelType.mobilenet_qualified
     // mobile net is bgr
-    private val means = floatArrayOf(127.5f, 127.5f, 127.5f)
-    private val ddims = intArrayOf(1, 3, 300, 300)
-    private val scale = 0.007843f
+    private val means = floatArrayOf(103.94f, 116.78f, 123.68f)
+    private val ddims = intArrayOf(1, 3, 224, 224)
+    private val scale = 0.017f
 //   b g r
     //   #    mean_value: [103.94,116.78,123.68]
 
@@ -58,6 +58,7 @@ class MobileNetSSDModelLoaderImpl : ModelLoader() {
         return dataBuf
     }
 
+
     override fun getInputSize(): Int {
         return ddims[2]
     }
@@ -71,15 +72,7 @@ class MobileNetSSDModelLoaderImpl : ModelLoader() {
         val assetPath = "pml_demo"
         val sdcardPath = (Environment.getExternalStorageDirectory().toString()
                 + File.separator + assetPath + File.separator + type)
-
-        val modelPath = sdcardPath + File.separator + "model"
-        val paramsPath = sdcardPath + File.separator + "params"
-        Log.d("pml", "loadpath : $sdcardPath")
-        Log.d("pml", "modelPath : $modelPath")
-        Log.d("pml", "paramsPath : $paramsPath")
-
-
-        PML.loadCombined(modelPath, paramsPath)
+        PML.loadQualified(sdcardPath)
     }
 
     override fun predictImage(inputBuf: FloatArray): FloatArray? {
@@ -95,8 +88,7 @@ class MobileNetSSDModelLoaderImpl : ModelLoader() {
     }
 
     override fun predictImage(bitmap: Bitmap): FloatArray? {
-        val buf = getScaledMatrix(bitmap, getInputSize(), getInputSize())
-        return predictImage(buf)
+        return predictImage(getScaledMatrix(bitmap, getInputSize(), getInputSize()))
     }
 
 
