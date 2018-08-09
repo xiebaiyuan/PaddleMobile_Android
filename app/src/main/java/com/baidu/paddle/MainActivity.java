@@ -503,8 +503,8 @@ public class MainActivity extends Activity {
         Log.d("pml", "sum: " + sum);
         tvSpeed.setText("detection cost：" + loader.getPredictImageTime() + "ms");
 
-        predictInfos.setText("index: " + maxi + " " +
-                "\n结果是: " + MobileNetClassfiedData.INSTANCE.getDataList().get(maxi) +
+        predictInfos.setText(
+                "结果是: " + MobileNetClassfiedData.INSTANCE.getDataList().get(maxi) +
                 "\n耗时:" + loader.getPredictImageTime() + "ms");
 
         // Toast.makeText(this, "maxindex: " + maxi + " max: " + max, Toast.LENGTH_SHORT).show();
