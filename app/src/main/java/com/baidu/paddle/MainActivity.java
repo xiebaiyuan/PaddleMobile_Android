@@ -62,7 +62,7 @@ public class MainActivity extends Activity {
 
     boolean isloaded = false;
     private ModelLoader loader = new MobileNetModelLoaderImpl();
-    ;
+    boolean isModelCopyed = false;
 
     private Button btnBanana;
 
@@ -189,6 +189,9 @@ public class MainActivity extends Activity {
 
     @SuppressLint({"CheckResult", "SetTextI18n"})
     private void copyModels() {
+        if (isModelCopyed) {
+            return;
+        }
         infos.setText("拷贝模型中....");
 
         Observable.create((ObservableEmitter<String> emitter) -> {
@@ -202,8 +205,9 @@ public class MainActivity extends Activity {
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread(), true)
                 .subscribe(path -> {
+                            isModelCopyed = true;
                             infos.setText("模型已拷贝至" + path);
-                            Toast.makeText(MainActivity.this, "模型已拷贝至" + path, Toast.LENGTH_SHORT).show();
+                          //  Toast.makeText(MainActivity.this, "模型已拷贝至" + path, Toast.LENGTH_SHORT).show();
                         }
                 );
 
@@ -465,12 +469,14 @@ public class MainActivity extends Activity {
      */
     @SuppressLint("SetTextI18n")
     private void scaleImageAndPredictImage(String path) {
+        tvSpeed.setText("");
         if (!isloaded) {
+            isloaded = true;
             loader.load();
         }
-        if (path == null) {
-            Toast.makeText(this, "", Toast.LENGTH_SHORT).show();
-        }
+//        if (path == null) {
+//            Toast.makeText(this, "", Toast.LENGTH_SHORT).show();
+//        }
         Bitmap scaleBitmap = getScaleBitmap(
                 MainActivity.this,
                 path
@@ -505,7 +511,7 @@ public class MainActivity extends Activity {
 
         predictInfos.setText(
                 "结果是: " + MobileNetClassfiedData.INSTANCE.getDataList().get(maxi) +
-                "\n耗时:" + loader.getPredictImageTime() + "ms");
+                        "\n耗时:" + loader.getPredictImageTime() + "ms");
 
         // Toast.makeText(this, "maxindex: " + maxi + " max: " + max, Toast.LENGTH_SHORT).show();
     }
