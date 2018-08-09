@@ -10,7 +10,6 @@ import android.graphics.Bitmap
 abstract class ModelLoader : IModelLoader {
     var predictImageTime: Long = -1
 
-
     /**
      * 将图片按照指定尺寸压好,将像素按照rs gs bs排列
      */

@@ -64,5 +64,19 @@
         android:layout_above="@id/ll_test"
         android:background="@android:color/background_light"
         android:scaleType="centerInside" />
+    <TextView
+        android:id="@+id/tv_infos"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:textColor="@android:color/background_dark"
+        />
 
+    <TextView
+        android:id="@+id/tv_preinfos"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/tv_infos"
+        android:textColor="@android:color/background_dark"
+        />
 </RelativeLayout>
