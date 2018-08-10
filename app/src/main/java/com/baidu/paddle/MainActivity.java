@@ -44,12 +44,15 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 import io.reactivex.Observable;
 import io.reactivex.ObservableEmitter;
 import io.reactivex.Observer;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
+import io.reactivex.functions.Consumer;
 import io.reactivex.schedulers.Schedulers;
 
 
@@ -325,7 +328,8 @@ public class MainActivity extends Activity {
         switch (requestCode) {
             case TAKE_PHOTO_REQUEST_CODE:
                 if (resultCode == RESULT_OK) {
-                    scaleImageAndPredictImage(mCurrentPath);
+                   // scaleImageAndPredictImage(mCurrentPath);
+                    scaleImageAndPredictImageTen(mCurrentPath);
                 }
                 break;
             default:
@@ -404,6 +408,105 @@ public class MainActivity extends Activity {
                         predictInfos.setText(
                                 "结果是: " + MobileNetClassfiedData.INSTANCE.getDataList().get(maxi) +
                                         "\n耗时:" + loader.getPredictImageTime() + "ms");
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        isbusy = false;
+                    }
+
+                    @Override
+                    public void onComplete() {
+                        isbusy = false;
+                    }
+                });
+    }
+
+
+    List<Long> timeList = new ArrayList<>();
+
+    /**
+     * 缩放然后predict这张图片
+     */
+    private void scaleImageAndPredictImageTen(String path) {
+        tvSpeed.setText("");
+        timeList.clear();
+        if (path == null) {
+            Toast.makeText(this, "图片lost", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        if (isbusy){
+            Toast.makeText(this, "处于前一次操作中", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        Observable
+                .just(path)
+                .map(s -> {
+                    if (!isloaded) {
+                        isloaded = true;
+                        loader.load();
+                    }
+                    return getScaleBitmap(
+                            MainActivity.this,
+                            path
+                    );
+                })
+//                .subscribeOn(Schedulers.io())
+//                .observeOn(AndroidSchedulers.mainThread())
+                .doOnNext(bitmap -> imageView.setImageBitmap(bitmap))
+
+                .map(bitmap -> {
+                    float[] floatsTen = null;
+                    for (int i = 0; i < 11; i++) {
+                        float[] floats = loader.predictImage(bitmap);
+                        long predictImageTime = loader.getPredictImageTime();
+                        timeList.add(predictImageTime);
+
+                        if (i ==10) {
+                            floatsTen =floats;
+                        }
+                    }
+                    return floatsTen;
+                })
+
+
+//                .observeOn(Schedulers.io())
+//                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Observer<float[]>() {
+                    @Override
+                    public void onSubscribe(Disposable d) {
+                        isbusy = true;
+                    }
+
+                    @Override
+                    public void onNext(float[] result) {
+                        float max = Float.MIN_VALUE;
+                        int maxi = -1;
+                        float sum = 0;
+                        if (result != null) {
+                            Log.d("pml", "result.length: " + result.length);
+
+                            for (int i = 0; i < result.length; ++i) {
+                                Log.d("detail", " index: " + i + " value: " + result[i]);
+                                sum += result[i];
+                                if (result[i] > max) {
+                                    max = result[i];
+                                    maxi = i;
+                                }
+                            }
+                        }
+                        Log.d("pml", "maxindex: " + maxi);
+                        Log.d("pml", "max: " + max);
+                        Log.d("pml", "sum: " + sum);
+                        tvSpeed.setText("");
+                        long sumTime = 0;
+                        for (int i = 1; i < timeList.size(); i++) {
+                            sumTime +=timeList.get(i);
+                        }
+                        predictInfos.setText(
+                                "结果是: " + MobileNetClassfiedData.INSTANCE.getDataList().get(maxi) +
+                                        "\n平均耗时:" + sumTime/10 + "ms");
                     }
 
                     @Override
