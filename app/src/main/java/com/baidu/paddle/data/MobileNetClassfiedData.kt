@@ -1,4 +1,4 @@
-package com.baidu.paddle
+package com.baidu.paddle.data
 
 object MobileNetClassfiedData {
     val dataList by lazy{

@@ -1,6 +1,10 @@
 package com.baidu.paddle.modeloader
 
+import android.content.Context
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.util.Log
+import com.baidu.paddle.MainActivity
 
 
 /**
@@ -40,6 +44,31 @@ abstract class ModelLoader : IModelLoader {
             bm.recycle()
         }
         return Triple(rs, gs, bs)
+    }
+
+    /**
+     * scale bitmap in case of OOM
+     */
+    fun getScaleBitmap(ctx: Context, filePath: String?): Bitmap {
+        Log.d("pml", "getScaleBitmap: filePath: $filePath")
+        val opt = BitmapFactory.Options()
+        opt.inJustDecodeBounds = true
+        BitmapFactory.decodeFile(filePath, opt)
+
+        val bmpWidth = opt.outWidth
+        val bmpHeight = opt.outHeight
+
+        val maxSize = getInputSize() * 2
+
+        opt.inSampleSize = 1
+        while (true) {
+            if (bmpWidth / opt.inSampleSize <= maxSize || bmpHeight / opt.inSampleSize <= maxSize) {
+                break
+            }
+            opt.inSampleSize *= 2
+        }
+        opt.inJustDecodeBounds = false
+        return BitmapFactory.decodeFile(filePath, opt)
     }
 
 }
