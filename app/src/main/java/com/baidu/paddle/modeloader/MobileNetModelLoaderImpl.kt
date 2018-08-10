@@ -71,6 +71,8 @@ class MobileNetModelLoaderImpl : ModelLoader() {
     }
 
     override fun load() {
+
+        PML.setThread(4)
         val assetPath = "pml_demo"
         val sdcardPath = (Environment.getExternalStorageDirectory().toString()
                 + File.separator + assetPath + File.separator + type)
