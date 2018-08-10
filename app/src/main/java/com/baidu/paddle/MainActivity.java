@@ -367,12 +367,12 @@ public class MainActivity extends Activity {
                             path
                     );
                 })
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
+//                .subscribeOn(Schedulers.io())
+//                .observeOn(AndroidSchedulers.mainThread())
                 .doOnNext(bitmap -> imageView.setImageBitmap(bitmap))
-                .observeOn(Schedulers.io())
+//                .observeOn(Schedulers.io())
                 .map(loader::predictImage)
-                .observeOn(AndroidSchedulers.mainThread())
+//                .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Observer<float[]>() {
                     @Override
                     public void onSubscribe(Disposable d) {
