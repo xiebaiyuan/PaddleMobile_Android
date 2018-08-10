@@ -32,7 +32,6 @@ import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.v4.content.FileProvider;
 import android.util.Log;
-import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -51,45 +50,29 @@ import io.reactivex.ObservableEmitter;
 import io.reactivex.Observer;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
-import io.reactivex.functions.Consumer;
 import io.reactivex.schedulers.Schedulers;
 
 
 @SuppressWarnings("ResultOfMethodCallIgnored")
+@SuppressLint({"SetTextI18n", "CheckResult"})
 public class MainActivity extends Activity {
     public static final int TAKE_PHOTO_REQUEST_CODE = 1001;
     public static final int PERMISSION_REQUEST_CODE = 1002;
+    private ModelLoader loader = new MobileNetModelLoaderImpl();
 
     boolean isloaded = false;
-    private ModelLoader loader = new MobileNetModelLoaderImpl();
     boolean isModelCopyed = false;
-
-    private Button btnBanana;
-
-    //    private ModelType type = ModelType.googlenet;
     private ImageView imageView;
     private TextView tvSpeed;
-    private Button button;
-    private Bitmap bmp;
 
     static {
         try {
             System.loadLibrary("paddle-mobile");
-
-        } catch (SecurityException e) {
+        } catch (SecurityException | UnsatisfiedLinkError | NullPointerException e) {
             e.printStackTrace();
-
-        } catch (UnsatisfiedLinkError e) {
-            e.printStackTrace();
-
-        } catch (NullPointerException e) {
-            e.printStackTrace();
-
         }
-
     }
 
-    private Uri mOriginUri;
     private TextView infos;
     private TextView predictInfos;
     private String mCurrentPath;
@@ -120,8 +103,8 @@ public class MainActivity extends Activity {
     private void init() {
         imageView = findViewById(R.id.imageView);
         tvSpeed = findViewById(R.id.tv_speed);
-        button = findViewById(R.id.button);
-        btnBanana = findViewById(R.id.predict_banada);
+        Button button = findViewById(R.id.button);
+        Button btnBanana = findViewById(R.id.predict_banada);
         infos = findViewById(R.id.tv_infos);
         predictInfos = findViewById(R.id.tv_preinfos);
         btnBanana.setOnClickListener(view -> scaleImageAndPredictImage(getBanana().getPath()));
@@ -131,28 +114,18 @@ public class MainActivity extends Activity {
                         Toast.LENGTH_LONG).show();
                 return;
             }
-//                Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-//                // save pic in sdcard
-//                Uri imageUri = Uri.fromFile(getTempImage());
-//                intent.putExtra(MediaStore.EXTRA_OUTPUT, imageUri);
-//                startActivityForResult(intent, TAKE_PHOTO_REQUEST_CODE);
-
             takePicFromCamera();
 
         });
-        Button bt_load = (Button) findViewById(R.id.bt_load);
+        Button bt_load = findViewById(R.id.bt_load);
         bt_load.setOnClickListener(view -> {
             isloaded = true;
             loader.load();
         });
-        Button bt_clear = (Button) findViewById(R.id.bt_clear);
-        bt_clear.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                isloaded = false;
-
-                loader.clear();
-            }
+        Button bt_clear = findViewById(R.id.bt_clear);
+        bt_clear.setOnClickListener(view -> {
+            isloaded = false;
+            loader.clear();
         });
 
 
@@ -165,6 +138,7 @@ public class MainActivity extends Activity {
         String path = getTempImage().getPath();
 
         mCurrentPath = path;
+        Uri mOriginUri;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             mOriginUri = FileProvider.getUriForFile(MainActivity.this.getApplication(), MainActivity.this.getApplication().getPackageName() + ".FileProvider",
                     new File(path));
@@ -182,7 +156,6 @@ public class MainActivity extends Activity {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
 
         if (requestCode == PERMISSION_REQUEST_CODE) {
-//            String[] permissions = {Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE};
             if (isGotNeededPermissions()) {
                 copyModels();
             } else {
@@ -211,11 +184,8 @@ public class MainActivity extends Activity {
                 .subscribe(path -> {
                             isModelCopyed = true;
                             infos.setText("模型已拷贝至" + path);
-                          //  Toast.makeText(MainActivity.this, "模型已拷贝至" + path, Toast.LENGTH_SHORT).show();
                         }
                 );
-
-
     }
 
     private boolean isGotNeededPermissions() {
@@ -281,10 +251,6 @@ public class MainActivity extends Activity {
 
     /**
      * scale bitmap in case of OOM
-     *
-     * @param ctx
-     * @param filePath
-     * @return
      */
     public Bitmap getScaleBitmap(Context ctx, String filePath) {
         Log.d(TAG, "getScaleBitmap: filePath: " + filePath);
@@ -304,20 +270,6 @@ public class MainActivity extends Activity {
             }
             opt.inSampleSize *= 2;
         }
-        opt.inJustDecodeBounds = false;
-        return BitmapFactory.decodeFile(filePath, opt);
-    }
-
-    /**
-     * scale bitmap in case of OOM
-     *
-     * @param ctx
-     * @param filePath
-     * @return
-     */
-    public Bitmap getBitmap(Context ctx, String filePath) {
-        Log.d(TAG, "getScaleBitmap: filePath: " + filePath);
-        BitmapFactory.Options opt = new BitmapFactory.Options();
         opt.inJustDecodeBounds = false;
         return BitmapFactory.decodeFile(filePath, opt);
     }
@@ -349,7 +301,6 @@ public class MainActivity extends Activity {
                 fos.close();
             }
         } catch (Exception e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
     }
@@ -374,11 +325,7 @@ public class MainActivity extends Activity {
         switch (requestCode) {
             case TAKE_PHOTO_REQUEST_CODE:
                 if (resultCode == RESULT_OK) {
-//                    DetectionTask detectionTask = new DetectionTask();
-//                    detectionTask.execute(getTempImage().getPath());
-
                     scaleImageAndPredictImage(mCurrentPath);
-
                 }
                 break;
             default:
@@ -386,154 +333,91 @@ public class MainActivity extends Activity {
         }
     }
 
-//    /**
-//     * draw rect on imageView
-//     *
-//     * @param bitmap
-//     * @param predicted
-//     * @param viewWidth
-//     * @param viewHeight
-//     */
-//    private void drawRect(Bitmap bitmap, float[] predicted, int viewWidth, int viewHeight) {
-//
-//        Canvas canvas = new Canvas(bitmap);
-//        canvas.drawBitmap(bitmap, 0, 0, null);
-//
-//        loader.drawRect(canvas, predicted, viewWidth, viewHeight);
-//
-//        imageView.setImageBitmap(bitmap);
-//
-//    }
-//
-//    private void drawImage(Bitmap bitmap) {
-//        Canvas canvas = new Canvas(bitmap);
-//        canvas.drawBitmap(bitmap, 0, 0, null);
-//        imageView.setImageBitmap(bitmap);
-//    }
-//
-//    float getMaxIndex(float[] predicted) {
-//        float max = 0;
-//        int index = 0;
-//        for (int i = 0; i < predicted.length; i++) {
-//            if (predicted[i] > max) {
-//                max = predicted[i];
-//                index = i;
-//            }
-//        }
-//        return index;
-//    }
-
-//    public float[] getScaledMatrix(Bitmap bitmap, int desWidth,
-//                                   int desHeight) {
-//        float[] dataBuf = new float[3 * desWidth * desHeight];
-//        int rIndex;
-//        int gIndex;
-//        int bIndex;
-//        int[] pixels = new int[desWidth * desHeight];
-//        Bitmap bm = Bitmap.createScaledBitmap(bitmap, desWidth, desHeight, false);
-//        bm.getPixels(pixels, 0, desWidth, 0, 0, desWidth, desHeight);
-//        int j = 0;
-//        int k = 0;
-//        for (int i = 0; i < pixels.length; i++) {
-//            int clr = pixels[i];
-//            j = i / desHeight;
-//            k = i % desWidth;
-//            rIndex = j * desWidth + k;
-//            gIndex = rIndex + desHeight * desWidth;
-//            bIndex = gIndex + desHeight * desWidth;
-//            dataBuf[rIndex] = (float) ((clr & 0x00ff0000) >> 16) - 148;
-//            dataBuf[gIndex] = (float) ((clr & 0x0000ff00) >> 8) - 148;
-//            dataBuf[bIndex] = (float) ((clr & 0x000000ff)) - 148;
-//
-//        }
-//        if (bm.isRecycled()) {
-//            bm.recycle();
-//        }
-//        return dataBuf;
-//
-//
-//    }
 
     /**
      * check whether sdcard is mounted
-     *
-     * @return
      */
     public boolean isHasSdCard() {
-        if (Environment.getExternalStorageState().equals(
-                Environment.MEDIA_MOUNTED)) {
-            return true;
-        } else {
-            return false;
-        }
+        return Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED);
     }
-
+    boolean isbusy = false;
     /**
      * 缩放然后predict这张图片
      */
-    @SuppressLint("SetTextI18n")
     private void scaleImageAndPredictImage(String path) {
         tvSpeed.setText("");
-        if (!isloaded) {
-            isloaded = true;
-            loader.load();
-        }
         if (path == null) {
             Toast.makeText(this, "图片lost", Toast.LENGTH_SHORT).show();
             return;
         }
-        Bitmap scaleBitmap = getScaleBitmap(
-                MainActivity.this,
-                path
-        );
-
-        imageView.setImageBitmap(scaleBitmap);
-        float[] result = loader.predictImage(
-                scaleBitmap
-        );
-
-        float max = Float.MIN_VALUE;
-        int maxi = -1;
-
-        float sum = 0;
-        if (result != null) {
-            Log.d("pml", "result.length: " + result.length);
-
-            for (int i = 0; i < result.length; ++i) {
-                Log.d("detail", " index: " + i + " value: " + result[i]);
-                sum += result[i];
-                if (result[i] > max) {
-                    max = result[i];
-                    maxi = i;
-                }
-            }
+        if (isbusy){
+            Toast.makeText(this, "处于前一次操作中", Toast.LENGTH_SHORT).show();
+            return;
         }
 
-        Log.d("pml", "maxindex: " + maxi);
-        Log.d("pml", "max: " + max);
-        Log.d("pml", "sum: " + sum);
-        tvSpeed.setText("detection cost：" + loader.getPredictImageTime() + "ms");
+        Observable
+                .just(path)
+                .map(s -> {
+                    if (!isloaded) {
+                        isloaded = true;
+                        loader.load();
+                    }
+                    return getScaleBitmap(
+                            MainActivity.this,
+                            path
+                    );
+                })
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .doOnNext(bitmap -> imageView.setImageBitmap(bitmap))
+                .observeOn(Schedulers.io())
+                .map(loader::predictImage)
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Observer<float[]>() {
+                    @Override
+                    public void onSubscribe(Disposable d) {
+                        isbusy = true;
+                    }
 
-        predictInfos.setText(
-                "结果是: " + MobileNetClassfiedData.INSTANCE.getDataList().get(maxi) +
-                        "\n耗时:" + loader.getPredictImageTime() + "ms");
+                    @Override
+                    public void onNext(float[] result) {
+                        float max = Float.MIN_VALUE;
+                        int maxi = -1;
+                        float sum = 0;
+                        if (result != null) {
+                            Log.d("pml", "result.length: " + result.length);
 
-        // Toast.makeText(this, "maxindex: " + maxi + " max: " + max, Toast.LENGTH_SHORT).show();
+                            for (int i = 0; i < result.length; ++i) {
+                                Log.d("detail", " index: " + i + " value: " + result[i]);
+                                sum += result[i];
+                                if (result[i] > max) {
+                                    max = result[i];
+                                    maxi = i;
+                                }
+                            }
+                        }
+                        Log.d("pml", "maxindex: " + maxi);
+                        Log.d("pml", "max: " + max);
+                        Log.d("pml", "sum: " + sum);
+                        tvSpeed.setText("detection cost：" + loader.getPredictImageTime() + "ms");
+
+                        predictInfos.setText(
+                                "结果是: " + MobileNetClassfiedData.INSTANCE.getDataList().get(maxi) +
+                                        "\n耗时:" + loader.getPredictImageTime() + "ms");
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        isbusy = false;
+                    }
+
+                    @Override
+                    public void onComplete() {
+                        isbusy = false;
+                    }
+                });
     }
-//    public void dumpData(float[] results, String filename) {
-//        try {
-//            File writename = new File(filename);
-//            writename.createNewFile();
-//            BufferedWriter out = new BufferedWriter(new FileWriter(writename));
-//            for (float result : results) {
-//                out.write(result + " ");
-//            }
-//            out.flush();
-//            out.close();
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-//    }
+
 
     @Override
     public void onBackPressed() {
@@ -541,69 +425,6 @@ public class MainActivity extends Activity {
         Log.d("pml", "pml clear");
         // clear pml
         isloaded = false;
-
         loader.clear();
-
     }
-
-//    class DetectionTask extends AsyncTask<String, Void, float[]> {
-//        private long time;
-//
-//        public DetectionTask() {
-//            super();
-//        }
-//
-//        @Override
-//        protected void onPreExecute() {
-//            super.onPreExecute();
-//
-//
-//        }
-//
-//        @Override
-//        protected float[] doInBackground(String... strings) {
-//            bmp = getScaleBitmap(mContext, strings[0]);
-//
-//            float[] result = null;
-//            try {
-//                result = loader.predictImage(bmp);
-//                time = loader.getPredictImageTime();
-//            } catch (Exception e) {
-//                e.printStackTrace();
-//            }
-//
-//            if (result != null) {
-//                for (int i = 0; i < result.length; ++i) {
-//                    Log.d("pml: ", " index: " + i + " value: " + result[i]);
-//                }
-//            }
-//
-//            return result;
-//        }
-//
-//        @Override
-//        protected void onPostExecute(float[] result) {
-//            super.onPostExecute(result);
-//            try {
-//                Bitmap src = Bitmap.createScaledBitmap(bmp, imageView.getWidth(),
-//                        imageView.getHeight(), false);
-//                drawRect(src, result, imageView.getWidth(), imageView.getHeight());
-//                tvSpeed.setText("detection cost：" + time + "ms");
-//            } catch (Exception e) {
-//                e.printStackTrace();
-//            }
-//        }
-//
-//        @Override
-//        protected void onProgressUpdate(Void... values) {
-//            super.onProgressUpdate(values);
-//        }
-//
-//        @Override
-//        protected void onCancelled() {
-//            super.onCancelled();
-//        }
-//
-//
-//    }
 }
