@@ -92,6 +92,7 @@ public class MainActivity extends Activity {
     private Uri mOriginUri;
     private TextView infos;
     private TextView predictInfos;
+    private String mCurrentPath;
 
 
     @Override
@@ -161,11 +162,14 @@ public class MainActivity extends Activity {
         Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
 
+        String path = getTempImage().getPath();
+
+        mCurrentPath = path;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             mOriginUri = FileProvider.getUriForFile(MainActivity.this.getApplication(), MainActivity.this.getApplication().getPackageName() + ".FileProvider",
-                    new File(getTempImage().getPath()));
+                    new File(path));
         } else {
-            mOriginUri = Uri.fromFile(new File(getTempImage().getPath()));
+            mOriginUri = Uri.fromFile(new File(path));
         }
         intent.putExtra(MediaStore.EXTRA_OUTPUT, mOriginUri);
 
@@ -373,7 +377,7 @@ public class MainActivity extends Activity {
 //                    DetectionTask detectionTask = new DetectionTask();
 //                    detectionTask.execute(getTempImage().getPath());
 
-                    scaleImageAndPredictImage(getTempImage().getPath());
+                    scaleImageAndPredictImage(mCurrentPath);
 
                 }
                 break;
@@ -474,9 +478,10 @@ public class MainActivity extends Activity {
             isloaded = true;
             loader.load();
         }
-//        if (path == null) {
-//            Toast.makeText(this, "", Toast.LENGTH_SHORT).show();
-//        }
+        if (path == null) {
+            Toast.makeText(this, "图片lost", Toast.LENGTH_SHORT).show();
+            return;
+        }
         Bitmap scaleBitmap = getScaleBitmap(
                 MainActivity.this,
                 path
@@ -495,7 +500,7 @@ public class MainActivity extends Activity {
             Log.d("pml", "result.length: " + result.length);
 
             for (int i = 0; i < result.length; ++i) {
-                Log.d("pml: ", " index: " + i + " value: " + result[i]);
+                Log.d("detail", " index: " + i + " value: " + result[i]);
                 sum += result[i];
                 if (result[i] > max) {
                     max = result[i];
