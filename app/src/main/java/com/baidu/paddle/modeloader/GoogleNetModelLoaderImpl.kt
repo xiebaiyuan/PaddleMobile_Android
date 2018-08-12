@@ -6,6 +6,8 @@ import android.graphics.Color
 import android.graphics.Paint
 import android.os.Environment
 import com.baidu.paddle.PML
+import org.jetbrains.anko.AnkoLogger
+import org.jetbrains.anko.info
 import java.io.File
 
 
@@ -13,7 +15,7 @@ import java.io.File
  * Created by xiebaiyuan on 2018/7/18.
  */
 
-class GoogleNetModelLoaderImpl : ModelLoader() {
+class GoogleNetModelLoaderImpl : ModelLoader(),AnkoLogger {
 
 
     private var type = ModelType.googlenet
@@ -35,6 +37,7 @@ class GoogleNetModelLoaderImpl : ModelLoader() {
         val assetPath = "pml_demo"
         val sdcardPath = (Environment.getExternalStorageDirectory().toString()
                 + File.separator + assetPath + File.separator + type)
+        info{sdcardPath}
         PML.load(sdcardPath)
     }
 

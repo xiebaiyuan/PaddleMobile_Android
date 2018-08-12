@@ -23,4 +23,6 @@ interface IModelLoader {
 
     fun predictImage(bitmap: Bitmap): FloatArray?
 
+    fun setThreadCount(mThreadCounts: Int)
+
 }

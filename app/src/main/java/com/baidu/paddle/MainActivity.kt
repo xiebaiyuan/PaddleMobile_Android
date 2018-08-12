@@ -28,32 +28,57 @@ import android.os.Environment
 import android.provider.MediaStore
 import android.support.v4.content.FileProvider
 import android.widget.Toast
+import com.afollestad.materialdialogs.MaterialDialog
 import com.baidu.paddle.data.MobileNetClassfiedData
 import com.baidu.paddle.data.banana
 import com.baidu.paddle.data.tempImage
-import com.baidu.paddle.modeloader.MobileNetModelLoaderImpl
+import com.baidu.paddle.modeloader.LoaderFactory
+import com.baidu.paddle.modeloader.ModelLoader
+import com.baidu.paddle.modeloader.ModelType
 import io.reactivex.Observable
 import io.reactivex.ObservableEmitter
 import io.reactivex.Observer
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
+import io.reactivex.functions.Consumer
 import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.main_activity.*
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 import java.io.File
-import java.util.*
+
 
 @SuppressLint("SetTextI18n")
 class MainActivity : Activity(), AnkoLogger {
 
+    private lateinit var mModelLoader: ModelLoader
 
-    private val loader = MobileNetModelLoaderImpl()
+    private var mCurrentType = ModelType.mobilenet
+    private var mThreadCounts = 1
+    val modelList: ArrayList<ModelType> by lazy {
+        val list = ArrayList<ModelType>()
+        list.add(ModelType.mobilenet)
+        list.add(ModelType.googlenet)
+        list.add(ModelType.mobilenet_ssd)
+        list
+    }
+
+    val threadCountList: ArrayList<Int> by lazy {
+
+        Runtime.getRuntime().availableProcessors()
+        val list = ArrayList<Int>()
+        for (i in (1..Runtime.getRuntime().availableProcessors())) {
+            list.add(i)
+        }
+        list
+    }
+
+
 
     private var isloaded = false
     private var isModelCopyed = false
 
-    private var mCurrentPath: String? = null
+    private var mCurrentPath: String? = banana.absolutePath
 
     private val isGotNeededPermissions: Boolean
         get() = PermissionUtils.checkPermissions(this, Manifest.permission.CAMERA) && PermissionUtils.checkPermissions(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
@@ -89,7 +114,10 @@ class MainActivity : Activity(), AnkoLogger {
     }
 
     private fun init() {
-        predict_banada.setOnClickListener { scaleImageAndPredictImage(banana.path) }
+        updateCurrentModel()
+        mModelLoader.setThreadCount(mThreadCounts)
+        thread_counts.text = "$mThreadCounts"
+        predict_banada.setOnClickListener { scaleImageAndPredictImageTen(mCurrentPath) }
         btn_takephoto.setOnClickListener {
             if (!isHasSdCard) {
                 Toast.makeText(this@MainActivity, R.string.sdcard_not_available,
@@ -101,15 +129,59 @@ class MainActivity : Activity(), AnkoLogger {
         }
         bt_load.setOnClickListener {
             isloaded = true
-            loader.load()
+            mModelLoader.load()
         }
 
         bt_clear.setOnClickListener {
             isloaded = false
-            loader.clear()
+            mModelLoader.clear()
+        }
+        ll_model.setOnClickListener {
+            MaterialDialog.Builder(this)
+                    .title("选择模型")
+                    .items(modelList)
+                    .itemsCallbackSingleChoice(modelList.indexOf(mCurrentType))
+                    { _, _, which, text ->
+
+                        info { "which=$which" }
+                        info { "text=$text" }
+                        mCurrentType = modelList[which]
+                        updateCurrentModel()
+                        reloadModel()
+                        true
+                    }
+                    .positiveText("确定")
+                    .show()
         }
 
+        ll_threadcount.setOnClickListener{
+            MaterialDialog.Builder(this)
+                    .title("设置线程数量")
+                    .items(threadCountList)
+                    .itemsCallbackSingleChoice(mThreadCounts - 1)
+                    { _, _, which, text ->
 
+                        info { "mThreadCounts=$text" }
+                        mThreadCounts = which+1
+                        mModelLoader.setThreadCount(mThreadCounts)
+                        reloadModel()
+                        thread_counts.text = "$mThreadCounts"
+                        true
+                    }
+                    .positiveText("确定")
+                    .show()
+        }
+    }
+
+    private fun reloadModel() {
+        mModelLoader.clear()
+        mModelLoader.load()
+        isloaded = true
+    }
+
+    private fun updateCurrentModel() {
+        tv_modetext.text = mCurrentType.name
+        mModelLoader = LoaderFactory.buildLoader(mCurrentType)
     }
 
     private fun takePicFromCamera() {
@@ -172,7 +244,26 @@ class MainActivity : Activity(), AnkoLogger {
         when (requestCode) {
             TAKE_PHOTO_REQUEST_CODE -> if (resultCode == Activity.RESULT_OK) {
                 // scaleImageAndPredictImage(mCurrentPath);
-                scaleImageAndPredictImageTen(mCurrentPath)
+//                scaleImageAndPredictImageTen(mCurrentPath)
+
+                Observable
+                        .just(mCurrentPath)
+                        .map {
+                            if (!isloaded) {
+                                isloaded = true
+                                mModelLoader.setThreadCount(mThreadCounts)
+                                mModelLoader.load()
+                            }
+                            mModelLoader.getScaleBitmap(
+                                    this@MainActivity,
+                                    mCurrentPath
+                            )
+                        }
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .doOnNext { bitmap -> show_image.setImageBitmap(bitmap) }
+                        .subscribe()
+
             }
             else -> {
             }
@@ -183,7 +274,6 @@ class MainActivity : Activity(), AnkoLogger {
      * 缩放然后predict这张图片
      */
     private fun scaleImageAndPredictImage(path: String?) {
-        tv_speed.text = ""
         if (path == null) {
             Toast.makeText(this, "图片lost", Toast.LENGTH_SHORT).show()
             return
@@ -198,9 +288,9 @@ class MainActivity : Activity(), AnkoLogger {
                 .map {
                     if (!isloaded) {
                         isloaded = true
-                        loader.load()
+                        mModelLoader.load()
                     }
-                    loader.getScaleBitmap(
+                    mModelLoader.getScaleBitmap(
                             this@MainActivity,
                             path
                     )
@@ -209,7 +299,7 @@ class MainActivity : Activity(), AnkoLogger {
                 //                .observeOn(AndroidSchedulers.mainThread())
                 .doOnNext { bitmap -> show_image.setImageBitmap(bitmap) }
                 //                .observeOn(Schedulers.io())
-                .map<FloatArray>(loader::predictImage)
+                .map<FloatArray>(mModelLoader::predictImage)
                 //                .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(object : Observer<FloatArray> {
                     override fun onSubscribe(d: Disposable) {
@@ -233,9 +323,8 @@ class MainActivity : Activity(), AnkoLogger {
                         info { "maxindex: $maxi" }
                         info { "max: $max" }
                         info { "sum: $sum" }
-                        tv_speed.text = "detection cost：" + loader.predictImageTime + "ms"
 
-                        tv_preinfos.text = "结果是: ${MobileNetClassfiedData.dataList[maxi]}\n耗时:${loader.predictImageTime}ms"
+                        tv_preinfos.text = "结果是: ${MobileNetClassfiedData.dataList[maxi]}\n耗时:${mModelLoader.predictImageTime}ms"
                     }
 
                     override fun onError(e: Throwable) {
@@ -252,7 +341,6 @@ class MainActivity : Activity(), AnkoLogger {
      * 缩放然后predict这张图片
      */
     private fun scaleImageAndPredictImageTen(path: String?) {
-        tv_speed.text = ""
         timeList.clear()
         if (path == null) {
             Toast.makeText(this, "图片lost", Toast.LENGTH_SHORT).show()
@@ -268,9 +356,10 @@ class MainActivity : Activity(), AnkoLogger {
                 .map {
                     if (!isloaded) {
                         isloaded = true
-                        loader.load()
+                        mModelLoader.setThreadCount(mThreadCounts)
+                        mModelLoader.load()
                     }
-                    loader.getScaleBitmap(
+                    mModelLoader.getScaleBitmap(
                             this@MainActivity,
                             path
                     )
@@ -282,8 +371,8 @@ class MainActivity : Activity(), AnkoLogger {
                 .map<FloatArray> { bitmap ->
                     var floatsTen: FloatArray? = null
                     for (i in 0..10) {
-                        val floats = loader.predictImage(bitmap)
-                        val predictImageTime = loader.predictImageTime
+                        val floats = mModelLoader.predictImage(bitmap)
+                        val predictImageTime = mModelLoader.predictImageTime
                         timeList.add(predictImageTime)
 
                         if (i == 10) {
@@ -316,7 +405,6 @@ class MainActivity : Activity(), AnkoLogger {
                         info { "maxindex: $maxi" }
                         info { "max: $max" }
                         info { "sum: $sum" }
-                        tv_speed.text = ""
                         var sumTime: Long = 0
                         for (i in 1 until timeList.size) {
                             sumTime += timeList[i]
@@ -341,7 +429,7 @@ class MainActivity : Activity(), AnkoLogger {
         info { "pml clear" }
         // clear pml
         isloaded = false
-        loader.clear()
+        mModelLoader.clear()
     }
 
     companion object {

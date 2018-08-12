@@ -91,3 +91,5 @@ release/
 
 /gradlew.bat
 app/src/main/assets.zip
+/app/src/main/assets/pml_demo/googlenet/
+/app/src/main/assets/pml_demo/mobilenet_ssd/

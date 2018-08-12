@@ -4,7 +4,7 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.util.Log
-import com.baidu.paddle.MainActivity
+import com.baidu.paddle.PML
 
 
 /**
@@ -69,6 +69,10 @@ abstract class ModelLoader : IModelLoader {
         }
         opt.inJustDecodeBounds = false
         return BitmapFactory.decodeFile(filePath, opt)
+    }
+
+    override fun setThreadCount(mThreadCounts: Int) {
+        PML.setThread(mThreadCounts)
     }
 
 }

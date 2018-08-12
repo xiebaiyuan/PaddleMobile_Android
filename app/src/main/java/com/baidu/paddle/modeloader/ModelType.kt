@@ -9,7 +9,7 @@ enum class ModelType {
     googlenet_combine,
     googlenet_qualified,
     mobilenet,
-    mobilenet_ssd_new,
+    mobilenet_ssd,
     mobilenet_qualified,
     mobilenet_ssd_new_qualified
 
