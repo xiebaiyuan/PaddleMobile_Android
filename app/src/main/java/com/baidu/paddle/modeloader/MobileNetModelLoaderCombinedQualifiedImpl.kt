@@ -1,10 +1,14 @@
 package com.baidu.paddle.modeloader
 
 import android.graphics.Bitmap
+import android.graphics.Canvas
+import android.graphics.Color
+import android.graphics.Paint
 import android.os.Environment
 import android.support.v7.widget.AppCompatImageView
 import android.util.Log
 import com.baidu.paddle.PML
+import org.jetbrains.anko.info
 import java.io.File
 
 
@@ -12,13 +16,13 @@ import java.io.File
  * Created by xiebaiyuan on 2018/7/18.
  */
 
-class MobileNetSSDModelCombinedQualifiedLoaderImpl : ModelLoader() {
+class MobileNetModelLoaderCombinedQualifiedImpl : ModelLoader() {
 
-    private var type = ModelType.mobilenet_ssd_new_qualified
+    private var type = ModelType.mobilenet_combined_qualified
     // mobile net is bgr
-    private val means = floatArrayOf(127.5f, 127.5f, 127.5f)
-    private val ddims = intArrayOf(1, 3, 300, 300)
-    private val scale = 0.007843f
+    private val means = floatArrayOf(103.94f, 116.78f, 123.68f)
+    private val ddims = intArrayOf(1, 3, 224, 224)
+    private val scale = 0.017f
 //   b g r
     //   #    mean_value: [103.94,116.78,123.68]
 
@@ -58,6 +62,7 @@ class MobileNetSSDModelCombinedQualifiedLoaderImpl : ModelLoader() {
         return dataBuf
     }
 
+
     override fun getInputSize(): Int {
         return ddims[2]
     }
@@ -74,6 +79,7 @@ class MobileNetSSDModelCombinedQualifiedLoaderImpl : ModelLoader() {
 
         val modelPath = sdcardPath + File.separator + "model"
         val paramsPath = sdcardPath + File.separator + "params"
+
         Log.d("pml", "loadpath : $sdcardPath")
         Log.d("pml", "modelPath : $modelPath")
         Log.d("pml", "paramsPath : $paramsPath")
@@ -95,11 +101,89 @@ class MobileNetSSDModelCombinedQualifiedLoaderImpl : ModelLoader() {
     }
 
     override fun predictImage(bitmap: Bitmap): FloatArray? {
-        val buf = getScaledMatrix(bitmap, getInputSize(), getInputSize())
-        return predictImage(buf)
+        return predictImage(getScaledMatrix(bitmap, getInputSize(), getInputSize()))
     }
 
+    override fun mixResult(showView: AppCompatImageView, predicted: Pair<FloatArray, Bitmap>) {
+        val src = predicted.second
+        val floats = predicted.first
 
+        val w = showView.width
+        val h = showView.height
+
+        val paint = Paint()
+        paint.color = Color.RED
+        paint.style = Paint.Style.STROKE
+        paint.strokeWidth = 3.0f
+
+        //create the new blank bitmap
+        val newb = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888)//创建一个新的和SRC长度宽度一样的位图
+        val cv = Canvas(newb)
+        //draw src into
+        cv.drawBitmap(src, 0f, 0f, null)//在 0，0坐标开始画入src
+        // l r t b
+        val l: Float = floats[0] * w
+        val r: Float = floats[1] * w
+
+        val t: Float = floats[2] * h
+        val b: Float = floats[3] * h
+        info {
+            "l= $l r= $r t= $t b= $b "
+        }
+        info {
+            " bitmap.width = ${newb.width}  " +
+                    " bitmap.height = ${newb.height} " +
+                    " showView.width = ${showView.width} " +
+                    " showView.height = ${showView.height}  "
+        }
+
+        cv.drawRect(l, t, r, b, paint)
+
+        //save all clip
+        cv.save(Canvas.ALL_SAVE_FLAG)//保存
+        //store
+        cv.restore()//存储
+
+        showView.setImageBitmap(newb)
+
+//        try {
+//            val bitmap = predicted.second
+//            val mutableBitmap = bitmap.copy(Bitmap.Config.ARGB_8888, true)
+//
+//
+//            val floats = predicted.first
+//            val paint = Paint()
+//            paint.color = Color.RED
+//            paint.style = Paint.Style.STROKE
+//            paint.strokeWidth = 3.0f
+//           val canvas = Canvas(mutableBitmap)
+////            canvas.drawBitmap(mutableBitmap,0f,0f,paint)
+//            info {
+//                " bitmap.width = ${bitmap.width}  " +
+//                        " bitmap.height = ${bitmap.height} " +
+//                        " showView.width = ${showView.width} " +
+//                        " showView.height = ${showView.height}  "
+//
+//
+//            }
+//            val x1: Float = floats[0] * showView.width
+//            val x2: Float = floats[2] * showView.width
+//            val y1: Float = floats[1] * showView.height
+//            val y2: Float = floats[3] * showView.height
+//            info {
+//                "x1= $x1 "+
+//                "x2= $x2 "+
+//                "y1= $y1 "+
+//                "y2= $y2 "
+//
+//            }
+//            canvas.drawRect(x1, y1, x2, y2, paint)
+//
+//
+//        } catch (e: Exception) {
+//            e.printStackTrace()
+//        }
+    }
 //    override fun mixResult(canvas: AppCompatImageView, predicted: Pair<FloatArray, Bitmap>, viewWidth: Int, viewHeight: Int) {
 //        val paint = Paint()
 //        paint.color = Color.RED
@@ -117,7 +201,7 @@ class MobileNetSSDModelCombinedQualifiedLoaderImpl : ModelLoader() {
 //        y2 = predicted[3] * viewHeight / 224
 //
 //
-//        canvas.mixResult(x1, y1, x2, y2, paint)
+//        canvas.drawRect(x1, y1, x2, y2, paint)
 //    }
 
 }

@@ -1,68 +1,155 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <LinearLayout
-        android:id="@+id/ll_bottom"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:background="@android:color/background_light"
-        android:orientation="horizontal">
-
-        <TextView
-            android:id="@+id/tv_speed"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="@string/time_cost"
-            android:textColor="@android:color/background_dark" />
-
-        <Button
-            android:id="@+id/button"
-            android:layout_width="match_parent"
-            android:layout_height="50dp"
-            android:layout_weight="1"
-            android:text="take photo" />
-    </LinearLayout>
 
     <LinearLayout
         android:id="@+id/ll_test"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_above="@id/ll_bottom"
+        android:layout_above="@id/logal"
         android:orientation="horizontal">
 
-        <Button
+        <android.support.v7.widget.AppCompatButton
             android:id="@+id/bt_load"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="load" />
+            android:text="load"
+            tools:ignore="HardcodedText" />
 
-        <Button
+        <android.support.v7.widget.AppCompatButton
             android:id="@+id/bt_clear"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="clear" />
+            android:text="clear"
+            tools:ignore="HardcodedText" />
 
-        <Button
+        <android.support.v7.widget.AppCompatButton
+            android:id="@+id/btn_takephoto"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="photo"
+            tools:ignore="HardcodedText" />
+
+        <android.support.v7.widget.AppCompatButton
             android:id="@+id/predict_banada"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="predict" />
+            android:text="predict"
+            tools:ignore="HardcodedText" />
+
     </LinearLayout>
 
-    <ImageView
-        android:id="@+id/imageView"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_above="@id/ll_test"
-        android:background="@android:color/background_light"
+    <android.support.v7.widget.AppCompatImageView
+        android:id="@+id/show_image"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/tv_preinfos"
+        android:layout_centerHorizontal="true"
+
         android:scaleType="centerInside" />
 
+    <android.support.v7.widget.AppCompatTextView
+        android:id="@+id/tv_preinfos"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/tv_infos"
+        android:maxLines="5"
+        android:minLines="5"
+        android:textSize="13sp"
+        tools:text="我是一些信息哈哈哈" />
+
+    <android.support.v7.widget.AppCompatTextView
+        android:id="@+id/tv_infos"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/ll_bottom"
+        android:textSize="10sp"
+        tools:ignore="SmallSp"
+
+        tools:text="过程信息" />
+
+    <LinearLayout
+        android:id="@+id/ll_bottom"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/ll_test"
+
+        android:orientation="vertical">
+
+        <RelativeLayout
+            android:id="@+id/ll_model"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+            <android.support.v7.widget.AppCompatTextView
+                android:id="@+id/model_lab"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentStart="true"
+                android:layout_centerVertical="true"
+                android:padding="5dp"
+                android:text="模型:"
+                android:textSize="20sp"
+                tools:ignore="HardcodedText" />
+
+            <android.support.v7.widget.AppCompatTextView
+                android:id="@+id/tv_modetext"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_toEndOf="@id/model_lab"
+                android:gravity="center"
+                android:padding="5dp"
+                android:textSize="20sp"
+                tools:text="模型" />
+
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:id="@+id/ll_threadcount"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+            <android.support.v7.widget.AppCompatTextView
+                android:id="@+id/thread_counts_lab"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentStart="true"
+                android:layout_centerVertical="true"
+                android:padding="5dp"
+                android:text="线程数量:"
+                android:textSize="20sp"
+                tools:ignore="HardcodedText" />
+
+            <android.support.v7.widget.AppCompatTextView
+                android:id="@+id/thread_counts"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_toEndOf="@id/thread_counts_lab"
+                android:gravity="center"
+                android:padding="5dp"
+                android:textSize="20sp"
+                tools:text="4" />
+
+        </RelativeLayout>
+
+
+    </LinearLayout>
+
+
+    <android.support.v7.widget.AppCompatImageView
+        android:id="@+id/logal"
+        android:layout_width="match_parent"
+        android:layout_height="20dp"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:scaleType="fitCenter"
+        android:src="@mipmap/logo_dark" />
 </RelativeLayout>

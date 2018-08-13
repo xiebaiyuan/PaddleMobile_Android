@@ -57,4 +57,11 @@ public class PML {
 
     public static native void clear();
 
+    /**
+     * 设置线程数
+     * @param threadCount
+     */
+    public static native void setThread(int threadCount);
+
+
 }

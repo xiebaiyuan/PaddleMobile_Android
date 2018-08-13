@@ -1,15 +1,21 @@
 package com.baidu.paddle.modeloader
 
+import android.content.Context
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.support.v7.widget.AppCompatImageView
+import android.util.Log
+import com.baidu.paddle.PML
+import org.jetbrains.anko.AnkoLogger
+import java.util.logging.Logger
 
 
 /**
  * Created by xiebaiyuan on 2018/7/18.
  */
 
-abstract class ModelLoader : IModelLoader {
+abstract class ModelLoader : IModelLoader,AnkoLogger {
     var predictImageTime: Long = -1
-
 
     /**
      * 将图片按照指定尺寸压好,将像素按照rs gs bs排列
@@ -43,4 +49,36 @@ abstract class ModelLoader : IModelLoader {
         return Triple(rs, gs, bs)
     }
 
+    /**
+     * scale bitmap in case of OOM
+     */
+    fun getScaleBitmap(ctx: Context, filePath: String?): Bitmap {
+        Log.d("pml", "getScaleBitmap: filePath: $filePath")
+        val opt = BitmapFactory.Options()
+        opt.inJustDecodeBounds = true
+        BitmapFactory.decodeFile(filePath, opt)
+
+        val bmpWidth = opt.outWidth
+        val bmpHeight = opt.outHeight
+
+        val maxSize = getInputSize() * 2
+
+        opt.inSampleSize = 1
+        while (true) {
+            if (bmpWidth / opt.inSampleSize <= maxSize || bmpHeight / opt.inSampleSize <= maxSize) {
+                break
+            }
+            opt.inSampleSize *= 2
+        }
+        opt.inJustDecodeBounds = false
+        return BitmapFactory.decodeFile(filePath, opt)
+    }
+
+    override fun setThreadCount(mThreadCounts: Int) {
+        PML.setThread(mThreadCounts)
+    }
+
+    override fun mixResult(showView: AppCompatImageView, predicted: Pair<FloatArray, Bitmap>){
+        // empty impl
+    }
 }

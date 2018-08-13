@@ -1,7 +1,7 @@
 package com.baidu.paddle.modeloader
 
 import android.graphics.Bitmap
-import android.graphics.Canvas
+import android.support.v7.widget.AppCompatImageView
 
 
 /**
@@ -19,8 +19,10 @@ interface IModelLoader {
 
     fun predictImage(inputBuf: FloatArray): FloatArray?
 
-    fun drawRect(canvas: Canvas, predicted: FloatArray, viewWidth: Int, viewHeight: Int)
+    fun mixResult(showView: AppCompatImageView, predicted: Pair<FloatArray, Bitmap>)
 
     fun predictImage(bitmap: Bitmap): FloatArray?
+
+    fun setThreadCount(mThreadCounts: Int)
 
 }
