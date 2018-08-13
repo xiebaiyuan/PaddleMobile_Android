@@ -58,12 +58,12 @@ class MainActivity : Activity(), AnkoLogger {
         val list = ArrayList<ModelType>()
         list.add(ModelType.mobilenet)
         list.add(ModelType.googlenet)
-        list.add(ModelType.mobilenet_ssd)
+        list.add(ModelType.mobilenet_combined)
+        list.add(ModelType.mobilenet_combined_qualified)
         list
     }
 
     val threadCountList: ArrayList<Int> by lazy {
-
         Runtime.getRuntime().availableProcessors()
         val list = ArrayList<Int>()
 //        for (i in (1..Runtime.getRuntime().availableProcessors())) {
@@ -389,7 +389,7 @@ class MainActivity : Activity(), AnkoLogger {
                 .doOnNext { bitmap -> show_image.setImageBitmap(bitmap) }
               //  .observeOn(Schedulers.io())
 
-                .map<FloatArray> { bitmap ->
+                .map { bitmap ->
                     var floatsTen: FloatArray? = null
                     for (i in 0..10) {
                         val floats = mModelLoader.predictImage(bitmap)
@@ -400,9 +400,16 @@ class MainActivity : Activity(), AnkoLogger {
                             floatsTen = floats
                         }
                     }
-                    floatsTen
+                    Pair(floatsTen!!,bitmap)
                 }
                 .observeOn(AndroidSchedulers.mainThread())
+                .map({ floatArrayBitmapPair ->
+
+                    mModelLoader.mixResult(show_image,floatArrayBitmapPair)
+
+                    floatArrayBitmapPair.second
+                    floatArrayBitmapPair.first
+                })
                 .subscribe(object : Observer<FloatArray> {
                     override fun onSubscribe(d: Disposable) {
                         isbusy = true

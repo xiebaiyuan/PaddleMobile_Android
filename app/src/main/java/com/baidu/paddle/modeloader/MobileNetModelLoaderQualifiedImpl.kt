@@ -1,9 +1,8 @@
 package com.baidu.paddle.modeloader
 
 import android.graphics.Bitmap
-import android.graphics.Canvas
 import android.os.Environment
-import android.widget.Toast
+import android.support.v7.widget.AppCompatImageView
 import com.baidu.paddle.PML
 import java.io.File
 
@@ -92,7 +91,7 @@ class MobileNetModelLoaderQualifiedImpl : ModelLoader() {
     }
 
 
-    override fun drawRect(canvas: Canvas, predicted: FloatArray, viewWidth: Int, viewHeight: Int) {
+    //   override fun mixResult(canvas: AppCompatImageView, predicted: Pair<FloatArray, Bitmap>, viewWidth: Int, viewHeight: Int) {
 //        val paint = Paint()
 //        paint.color = Color.RED
 //        paint.style = Paint.Style.STROKE
@@ -109,7 +108,7 @@ class MobileNetModelLoaderQualifiedImpl : ModelLoader() {
 //        y2 = predicted[3] * viewHeight / 224
 //
 //
-//        canvas.drawRect(x1, y1, x2, y2, paint)
-    }
+//        canvas.mixResult(x1, y1, x2, y2, paint)
+//   }
 
 }

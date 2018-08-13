@@ -3,15 +3,18 @@ package com.baidu.paddle.modeloader
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.support.v7.widget.AppCompatImageView
 import android.util.Log
 import com.baidu.paddle.PML
+import org.jetbrains.anko.AnkoLogger
+import java.util.logging.Logger
 
 
 /**
  * Created by xiebaiyuan on 2018/7/18.
  */
 
-abstract class ModelLoader : IModelLoader {
+abstract class ModelLoader : IModelLoader,AnkoLogger {
     var predictImageTime: Long = -1
 
     /**
@@ -75,4 +78,7 @@ abstract class ModelLoader : IModelLoader {
         PML.setThread(mThreadCounts)
     }
 
+    override fun mixResult(showView: AppCompatImageView, predicted: Pair<FloatArray, Bitmap>){
+        // empty impl
+    }
 }

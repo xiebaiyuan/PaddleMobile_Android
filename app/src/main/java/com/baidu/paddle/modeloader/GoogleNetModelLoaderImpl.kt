@@ -1,10 +1,10 @@
 package com.baidu.paddle.modeloader
 
 import android.graphics.Bitmap
-import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
 import android.os.Environment
+import android.support.v7.widget.AppCompatImageView
 import com.baidu.paddle.PML
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
@@ -84,17 +84,17 @@ class GoogleNetModelLoaderImpl : ModelLoader(),AnkoLogger {
         return result
     }
 
-    override fun drawRect(canvas: Canvas, predicted: FloatArray, viewWidth: Int, viewHeight: Int) {
-        val paint = Paint()
-        paint.color = Color.RED
-        paint.style = Paint.Style.STROKE
-        paint.strokeWidth = 3.0f
-        val x1: Float = predicted[0] * viewWidth / 224
-        val x2: Float = predicted[2] * viewWidth / 224
-        val y1: Float = predicted[1] * viewHeight / 224
-        val y2: Float = predicted[3] * viewHeight / 224
-        canvas.drawRect(x1, y1, x2, y2, paint)
-    }
+//    override fun mixResult(canvas: AppCompatImageView, predicted: Pair<FloatArray, Bitmap>, viewWidth: Int, viewHeight: Int) {
+//        val paint = Paint()
+//        paint.color = Color.RED
+//        paint.style = Paint.Style.STROKE
+//        paint.strokeWidth = 3.0f
+//        val x1: Float = predicted[0] * viewWidth / 224
+//        val x2: Float = predicted[2] * viewWidth / 224
+//        val y1: Float = predicted[1] * viewHeight / 224
+//        val y2: Float = predicted[3] * viewHeight / 224
+//        canvas.mixResult(x1, y1, x2, y2, paint)
+//    }
 
 
     override fun predictImage(bitmap: Bitmap): FloatArray?{

@@ -49,12 +49,12 @@
 
     <android.support.v7.widget.AppCompatImageView
         android:id="@+id/show_image"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_above="@id/tv_preinfos"
         android:layout_centerHorizontal="true"
 
-        android:scaleType="fitXY" />
+        android:scaleType="centerInside" />
 
     <android.support.v7.widget.AppCompatTextView
         android:id="@+id/tv_preinfos"
