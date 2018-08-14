@@ -119,7 +119,6 @@ class MainActivity : Activity(), AnkoLogger {
         mModelLoader.setThreadCount(mThreadCounts)
         thread_counts.text = "$mThreadCounts"
         clearInfos()
-        scaleAndShowBitmap(banana.absolutePath)
         mCurrentPath = banana.absolutePath
         predict_banada.setOnClickListener { scaleImageAndPredictImageTen(mCurrentPath) }
         btn_takephoto.setOnClickListener {
@@ -248,6 +247,7 @@ class MainActivity : Activity(), AnkoLogger {
                 .subscribe { path ->
                     isModelCopyed = true
                     tv_infos.text = "模型已拷贝至$path"
+                    scaleAndShowBitmap(banana.absolutePath)
                     dialog.dismiss()
                 }
     }
