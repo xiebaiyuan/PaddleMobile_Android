@@ -95,3 +95,5 @@ app/src/main/assets.zip
 /app/src/main/assets/pml_demo/mobilenet_ssd/
 /app/src/main/assets/pml_demo/mobilenet_combined/
 /app/src/main/assets/pml_demo/mobilenet_combined_qualified/
+/app/src/main/assets/pml_demo/ssd_mobilenet_v1_pascalvoc/
+/app/src/main/assets/pml_demo/mobilenet_ssd_sep/

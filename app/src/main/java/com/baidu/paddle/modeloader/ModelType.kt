@@ -13,6 +13,7 @@ enum class ModelType {
     mobilenet_qualified,
     mobilenet_ssd_new_qualified,
     mobilenet_combined,
-    mobilenet_combined_qualified
+    mobilenet_combined_qualified,
+    mobilenet_ssd_sep
 
 }

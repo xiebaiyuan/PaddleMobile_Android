@@ -7,6 +7,7 @@ object LoaderFactory {
         ModelType.mobilenet_ssd -> MobileNetSSDCombinedModelLoaderImpl()
         ModelType.mobilenet_combined -> MobileNetModelLoaderCombinedImpl()
         ModelType.mobilenet_combined_qualified -> MobileNetModelLoaderCombinedQualifiedImpl()
+        ModelType.mobilenet_ssd_sep -> MobileNetSSDModelLoaderImpl()
         else -> MobileNetModelLoaderImpl()
     }
 }
