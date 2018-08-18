@@ -43,7 +43,7 @@ abstract class ModelLoader : IModelLoader,AnkoLogger {
             gs.add(g)
             bs.add(b)
         }
-        if (bm.isRecycled) {
+        if (!bm.isRecycled) {
             bm.recycle()
         }
         return Triple(rs, gs, bs)

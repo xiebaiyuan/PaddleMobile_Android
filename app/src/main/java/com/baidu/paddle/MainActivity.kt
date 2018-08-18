@@ -56,10 +56,12 @@ class MainActivity : Activity(), AnkoLogger {
     private var mThreadCounts = 4
     val modelList: ArrayList<ModelType> by lazy {
         val list = ArrayList<ModelType>()
-        list.add(ModelType.mobilenet)
-        list.add(ModelType.googlenet)
-        list.add(ModelType.mobilenet_combined)
-        list.add(ModelType.mobilenet_combined_qualified)
+//        list.add(ModelType.mobilenet)
+//        list.add(ModelType.googlenet)
+//        list.add(ModelType.mobilenet_combined)
+//        list.add(ModelType.mobilenet_combined_qualified)
+//        list.add(ModelType.googlenet_combine_quali)
+        list.add(ModelType.genet_combine)
         list
     }
 
@@ -370,7 +372,6 @@ class MainActivity : Activity(), AnkoLogger {
 //                .progress(true, 0)
 //                .show()
 
-
         Observable
                 .just(path)
                 .map {
@@ -421,8 +422,33 @@ class MainActivity : Activity(), AnkoLogger {
                         var sum = 0f
                         info { "result.length: " + result.size }
 
+//                        for (i in result.indices) {
+//                            info { " index: " + i + " value: " + result[i] }
+//                            sum += result[i]
+//                            if (result[i] > max) {
+//                                max = result[i]
+//                                maxi = i
+//                            }
+//                        }
+//                        info { "maxindex: $maxi" }
+//                        info { "max: $max" }
+//                        info { "sum: $sum" }
+//                        var sumTime: Long = 0
+//                        for (i in 1 until timeList.size) {
+//                            sumTime += timeList[i]
+//                        }
+//
+////                        val resultInfo = "结果是: ${MobileNetClassfiedData.dataList[maxi]}\n"
+//                        val timeInfo = "平均耗时:${sumTime / 10}ms"
+//
+//                        tv_preinfos.text = "" + timeInfo
+
+             //           dialog.dismiss()
+
+                        val resultInfos = StringBuilder()
                         for (i in result.indices) {
                             info { " index: " + i + " value: " + result[i] }
+                            resultInfos.appendln(" index: $i value: ${result[i]}")
                             sum += result[i]
                             if (result[i] > max) {
                                 max = result[i]
@@ -437,12 +463,17 @@ class MainActivity : Activity(), AnkoLogger {
                             sumTime += timeList[i]
                         }
 
-                        val resultInfo = "结果是: ${MobileNetClassfiedData.dataList[maxi]}\n"
-                        val timeInfo = "平均耗时:${sumTime / 10L}ms"
+//                        val resultInfo = "结果是: ${MobileNetClassfiedData.dataList[maxi]}\n"
+                        val timeInfo = "运行10次平均耗时:${sumTime / 10L}ms"
 
-                        tv_preinfos.text = resultInfo + timeInfo
-
-             //           dialog.dismiss()
+                        //   tv_preinfos.text = resultInfo + timeInfo
+                        tv_preinfos.text = timeInfo + "\n" + "点击查看结果"
+                        tv_preinfos.setOnClickListener{
+                            val dialog = MaterialDialog.Builder(this@MainActivity)
+                                    .title("结果:")
+                                    .content(timeInfo + "\n" + resultInfos.toString())
+                                    .show()
+                        }
 
                     }
 
