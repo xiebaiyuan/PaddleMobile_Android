@@ -99,3 +99,5 @@ app/src/main/assets.zip
 /app/src/main/assets/pml_demo/googlenet_combine_quali/
 /app/src/main/assets/pml_demo/mobilenet_ssd_sep/
 /app/src/main/assets/pml_demo/genet_combine/
+/app/src/main/assets_ar/*
+/app/src/main/assets_dev/*

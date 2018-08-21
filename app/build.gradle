@@ -4,6 +4,14 @@ apply plugin: 'kotlin-android-extensions'
 
 
 android {
+    signingConfigs {
+        paddlemobile {
+            keyAlias '123456'
+            keyPassword '123456'
+            storeFile file('../paddledemo')
+            storePassword '123456'
+        }
+    }
     compileSdkVersion 27
     defaultConfig {
         applicationId "com.baidu.paddle"
@@ -11,6 +19,7 @@ android {
         targetSdkVersion 27
         versionCode 1
         versionName "1.0"
+        signingConfig signingConfigs.paddlemobile
     }
     buildTypes {
         release {
@@ -23,19 +32,51 @@ android {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
+    flavorDimensions "mode"/*, "api"*/
+    productFlavors {
+        dev {
+            buildConfigField "String", "BUILD_NAME", "\"main\""
+            dimension "mode"
+        }
+        ar {
+            buildConfigField "String", "BUILD_NAME", "\"ar\""
+            dimension "mode"
+        }
+
+        ademo {
+            buildConfigField "String", "BUILD_NAME", "\"demo\""
+            dimension "mode"
+        }
+    }
+    sourceSets {
+        main {
+            assets.srcDirs = ['src/main/assets']
+        }
+
+        ar {
+            assets.srcDirs = ['src/main/assets_ar']
+        }
+
+        dev {
+            assets.srcDirs = ['src/main/assets_dev']
+        }
+
+        ademo {
+            assets.srcDirs = ['src/main/assets_ademo']
+        }
+    }
 }
+
 
 dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
     implementation "org.jetbrains.anko:anko:$anko_version"
-
     implementation fileTree(include: ['*.jar'], dir: 'libs')
     // implementation 'com.afollestad.material-dialogs:core:0.9.6.0'
     implementation 'com.afollestad.material-dialogs:commons:0.9.6.0'
     implementation 'io.reactivex.rxjava2:rxjava:2.2.0'
     implementation 'io.reactivex.rxjava2:rxandroid:2.0.2'
     implementation 'io.reactivex.rxjava2:rxkotlin:2.2.0'
-
     //    implementation "com.github.hotchemi:permissionsdispatcher:4.0.0-alpha1"
     //    kapt "com.github.hotchemi:permissionsdispatcher-processor:4.0.0-alpha1"
 }
