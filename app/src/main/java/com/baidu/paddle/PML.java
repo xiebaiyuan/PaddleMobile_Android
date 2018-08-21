@@ -2,66 +2,98 @@ package com.baidu.paddle;
 
 public class PML {
     /**
-     * Load seperated parameters
-     * @param modelDir
-     * @return
+     * load seperated model
+     *
+     * @param modelDir model dir
+     * @return isloadsuccess
      */
     public static native boolean load(String modelDir);
 
     /**
-     * Load combined parameters
-     * @param modelPath
-     * @param paramPath
-     * @return
+     * load combined model
+     *
+     * @param modelPath model file path
+     * @param paramPath param file path
+     * @return isloadsuccess
      */
-    public static native boolean loadCombined(String modelPath,String paramPath);
-
+    public static native boolean loadCombined(String modelPath, String paramPath);
 
     /**
-     * Load seperated Qualified parameters
-     * @param modelDir
-     * @return
+     * load model and qualified params
+     *
+     * @param modelDir qualified model dir
+     * @return isloadsuccess
      */
     public static native boolean loadQualified(String modelDir);
 
     /**
-     * Load combined Qualified parameters
-     * @param modelPath
-     * @param paramPath
-     * @return
+     * load model and qualified combined params
+     *
+     * @param modelPath model file path
+     * @param paramPath qualified param path
+     * @return isloadsuccess
      */
-    public static native boolean loadCombinedQualified(String modelPath,String paramPath);
-
+    public static native boolean loadCombinedQualified(String modelPath, String paramPath);
 
     /**
-     * object detection
+     * predick image
      *
-     * @param buf
-     * @return
+     * @param buf   of pretreated image (as your model like)
+     * @param ddims format of your input
+     * @return result
      */
-    public static native float[] predictImage(float[] buf, int[]ddims);
+    public static native float[] predictImage(float[] buf, int[] ddims);
+
+
+    public static native float[] predictYuv(byte[] buf, int imgWidth, int imgHeight, int[] ddims, float[] meanValues);
 
     /**
-     *
-     * @param buf yuv420格式的字节数组
-     * @param imgWidth yuv数据的宽
-     * @param imgHeight yuv数据的高
-     * @param ddims 输入数据的形状
-     * @param meanValues 模型训练时各通道的均值
-     * @return
+     * clear model data
      */
-
-    public static native float[] predictYuv(byte[] buf, int imgWidth, int imgHeight, int[] ddims, float[]meanValues);
-
-
-
     public static native void clear();
 
     /**
-     * 设置线程数
-     * @param threadCount
+     * setThread num when u enable openmp
+     *
+     * @param threadCount threadCount
      */
     public static native void setThread(int threadCount);
+
+
+
+    /**
+     * load seperated model
+     *
+     * @param modelDir model dir
+     * @return isloadsuccess
+     */
+    public static native boolean loadEncrypt(String modelDir,String entryptKey);
+
+    /**
+     * load combined model
+     *
+     * @param modelPath model file path
+     * @param paramPath param file path
+     * @return isloadsuccess
+     */
+    public static native boolean loadCombinedEncrypt(String modelPath, String paramPath,String entryptKey);
+
+    /**
+     * load model and qualified params
+     *
+     * @param modelDir qualified model dir
+     * @return isloadsuccess
+     */
+    public static native boolean loadQualifiedEncrypt(String modelDir,String entryptKey);
+
+    /**
+     * load model and qualified combined params
+     *
+     * @param modelPath model file path
+     * @param paramPath qualified param path
+     * @return isloadsuccess
+     */
+    public static native boolean loadCombinedQualifiedEncrypt(String modelPath, String paramPath,String entryptKey);
 
 
 }

@@ -31,6 +31,7 @@ import android.widget.Toast
 import com.afollestad.materialdialogs.MaterialDialog
 import com.baidu.paddle.data.MobileNetClassfiedData
 import com.baidu.paddle.data.banana
+import com.baidu.paddle.data.pathList
 import com.baidu.paddle.data.tempImage
 import com.baidu.paddle.modeloader.LoaderFactory
 import com.baidu.paddle.modeloader.ModelLoader
@@ -40,11 +41,13 @@ import io.reactivex.ObservableEmitter
 import io.reactivex.Observer
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
+import io.reactivex.rxkotlin.toObservable
 import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.main_activity.*
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 import java.io.File
+import java.util.concurrent.TimeUnit
 
 
 @SuppressLint("SetTextI18n")
@@ -52,14 +55,16 @@ class MainActivity : Activity(), AnkoLogger {
 
     private lateinit var mModelLoader: ModelLoader
 
-    private var mCurrentType = ModelType.mobilenet
-    private var mThreadCounts = 4
+    private var mCurrentType = ModelType.genet_combine
+    private var mThreadCounts = 1
     val modelList: ArrayList<ModelType> by lazy {
         val list = ArrayList<ModelType>()
         list.add(ModelType.mobilenet)
         list.add(ModelType.googlenet)
         list.add(ModelType.mobilenet_combined)
         list.add(ModelType.mobilenet_combined_qualified)
+        list.add(ModelType.mobilenet_ssd_gesture)
+        list.add(ModelType.genet_combine)
         list
     }
 
@@ -120,7 +125,12 @@ class MainActivity : Activity(), AnkoLogger {
         thread_counts.text = "$mThreadCounts"
         clearInfos()
         mCurrentPath = banana.absolutePath
-        predict_banada.setOnClickListener { scaleImageAndPredictImageTen(mCurrentPath) }
+        predict_banada.setOnClickListener {
+
+
+            scaleImageAndPredictImageTen(mCurrentPath)
+
+        }
         btn_takephoto.setOnClickListener {
             if (!isHasSdCard) {
                 Toast.makeText(this@MainActivity, R.string.sdcard_not_available,
@@ -296,6 +306,8 @@ class MainActivity : Activity(), AnkoLogger {
             return
         }
 
+
+
         Observable
                 .just(path)
                 .map {
@@ -354,8 +366,7 @@ class MainActivity : Activity(), AnkoLogger {
      * 缩放然后predict这张图片
      */
     private fun scaleImageAndPredictImageTen(path: String?) {
-        timeList.clear()
-        tv_infos.text  = "运算中..."
+
         if (path == null) {
             Toast.makeText(this, "图片lost", Toast.LENGTH_SHORT).show()
             return
@@ -364,6 +375,8 @@ class MainActivity : Activity(), AnkoLogger {
             Toast.makeText(this, "处于前一次操作中", Toast.LENGTH_SHORT).show()
             return
         }
+        timeList.clear()
+        tv_infos.text = "运算中..."
 //        val dialog = MaterialDialog.Builder(this)
 //                .title("运算中")
 //                .content("请稍等")
@@ -387,7 +400,7 @@ class MainActivity : Activity(), AnkoLogger {
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .doOnNext { bitmap -> show_image.setImageBitmap(bitmap) }
-              //  .observeOn(Schedulers.io())
+                //  .observeOn(Schedulers.io())
 
                 .map { bitmap ->
                     var floatsTen: FloatArray? = null
@@ -400,16 +413,16 @@ class MainActivity : Activity(), AnkoLogger {
                             floatsTen = floats
                         }
                     }
-                    Pair(floatsTen!!,bitmap)
+                    Pair(floatsTen!!, bitmap)
                 }
                 .observeOn(AndroidSchedulers.mainThread())
                 .map({ floatArrayBitmapPair ->
 
-                    mModelLoader.mixResult(show_image,floatArrayBitmapPair)
+                    mModelLoader.mixResult(show_image, floatArrayBitmapPair)
 
                     floatArrayBitmapPair.second
                     floatArrayBitmapPair.first
-                })
+                })/*.repeat(1000)*/
                 .subscribe(object : Observer<FloatArray> {
                     override fun onSubscribe(d: Disposable) {
                         isbusy = true
@@ -421,28 +434,58 @@ class MainActivity : Activity(), AnkoLogger {
                         var sum = 0f
                         info { "result.length: " + result.size }
 
-                        for (i in result.indices) {
-                            info { " index: " + i + " value: " + result[i] }
-                            sum += result[i]
-                            if (result[i] > max) {
-                                max = result[i]
-                                maxi = i
-                            }
+//                        for (i in result.indices) {
+//                            info { " index: " + i + " value: " + result[i] }
+//                            sum += result[i]
+//                            if (result[i] > max) {
+//                                max = result[i]
+//                                maxi = i
+//                            }
+//                        }
+//                        info { "maxindex: $maxi" }
+//                        info { "max: $max" }
+//                        info { "sum: $sum" }
+//                        var sumTime: Long = 0
+//                        for (i in 1 until timeList.size) {
+//                            sumTime += timeList[i]
+//                        }
+//
+////                        val resultInfo = "结果是: ${MobileNetClassfiedData.dataList[maxi]}\n"
+//                        val timeInfo = "平均耗时:${sumTime / 10}ms"
+//
+//                        tv_preinfos.text = "" + timeInfo
+
+                        //           dialog.dismiss()
+
+//                        val resultInfos = StringBuilder()
+//                        for (i in result.indices) {
+//                           info { " index: " + i + " value: " + result[i] }
+//                           resultInfos.appendln(" index: $i value: ${result[i]}")
+//                            sum += result[i]
+//                            if (result[i] > max) {
+//                                max = result[i]
+//                                maxi = i
+//                            }
+//                        }
+//                        info { "maxindex: $maxi" }
+//                        info { "max: $max" }
+//                        info { "sum: $sum" }
+////                        var sumTime: Long = 0
+//                        for (i in 1 until timeList.size) {
+//                            sumTime += timeList[i]
+//                        }
+                        timeList.removeAt(0)
+//                        val resultInfo = "结果是: ${MobileNetClassfiedData.dataList[maxi]}\n"
+                        val timeInfo = "运行10次平均耗时:${timeList.average()}ms"
+
+                        //   tv_preinfos.text = resultInfo + timeInfo
+                        tv_preinfos.text = "$timeInfo\n点击查看结果"
+                        tv_preinfos.setOnClickListener {
+                            MaterialDialog.Builder(this@MainActivity)
+                                    .title("结果:")
+                                    .content(timeInfo + "\n  result.size: " + result.size)
+                                    .show()
                         }
-                        info { "maxindex: $maxi" }
-                        info { "max: $max" }
-                        info { "sum: $sum" }
-                        var sumTime: Long = 0
-                        for (i in 1 until timeList.size) {
-                            sumTime += timeList[i]
-                        }
-
-                        val resultInfo = "结果是: ${MobileNetClassfiedData.dataList[maxi]}\n"
-                        val timeInfo = "平均耗时:${sumTime / 10L}ms"
-
-                        tv_preinfos.text = resultInfo + timeInfo
-
-             //           dialog.dismiss()
 
                     }
 
@@ -452,7 +495,150 @@ class MainActivity : Activity(), AnkoLogger {
 
                     override fun onComplete() {
                         isbusy = false
-                        tv_infos.text  = ""
+                        tv_infos.text = ""
+                    }
+                })
+    }
+
+    /**
+     * 缩放然后predict这张图片
+     */
+    private fun scaleImageAndPredictImageleaktest(path: String?) {
+
+//        if (path == null) {
+//            Toast.makeText(this, "图片lost", Toast.LENGTH_SHORT).show()
+//            return
+//        }
+//        if (isbusy) {
+//            Toast.makeText(this, "处于前一次操作中", Toast.LENGTH_SHORT).show()
+//            return
+//        }
+        timeList.clear()
+        tv_infos.text = "运算中..."
+//        val dialog = MaterialDialog.Builder(this)
+//                .title("运算中")
+//                .content("请稍等")
+//                .progress(true, 0)
+//                .show()
+        pathList
+                .toObservable()
+                .delay(10, TimeUnit.MILLISECONDS)
+                .map {
+                    info { "path  = :$it" }
+                    if (!isloaded) {
+                        isloaded = true
+                        mModelLoader.setThreadCount(mThreadCounts)
+                        mModelLoader.load()
+                    }
+                    mModelLoader.getScaleBitmap(
+                            this@MainActivity,
+                            it
+                    )
+                }
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+//                .doOnNext { bitmap -> show_image.setImageBitmap(bitmap) }
+                //  .observeOn(Schedulers.io())
+
+                .map { bitmap ->
+                    var floatsTen: FloatArray? = null
+//                    for (i in 0..10) {
+//                        val floats = mModelLoader.predictImage(bitmap)
+//                        val predictImageTime = mModelLoader.predictImageTime
+//                        timeList.add(predictImageTime)
+//
+//                        if (i == 10) {
+//                            floatsTen = floats
+//                        }
+//                    }
+                    val floats = mModelLoader.predictImage(bitmap)
+                    floatsTen = floats
+                    val predictImageTime = mModelLoader.predictImageTime
+                    timeList.add(predictImageTime)
+                    Pair(floatsTen!!, bitmap)
+                }
+                .observeOn(AndroidSchedulers.mainThread())
+                .map({ floatArrayBitmapPair ->
+
+                    mModelLoader.mixResult(show_image, floatArrayBitmapPair)
+
+                    floatArrayBitmapPair.second
+                    floatArrayBitmapPair.first
+                }).repeat(10)
+                .subscribe(object : Observer<FloatArray> {
+                    override fun onSubscribe(d: Disposable) {
+                        isbusy = true
+                    }
+
+                    override fun onNext(result: FloatArray) {
+                        var max = java.lang.Float.MIN_VALUE
+                        var maxi = -1
+                        var sum = 0f
+                        info { "result.length: " + result.size }
+
+//                        for (i in result.indices) {
+//                            info { " index: " + i + " value: " + result[i] }
+//                            sum += result[i]
+//                            if (result[i] > max) {
+//                                max = result[i]
+//                                maxi = i
+//                            }
+//                        }
+//                        info { "maxindex: $maxi" }
+//                        info { "max: $max" }
+//                        info { "sum: $sum" }
+//                        var sumTime: Long = 0
+//                        for (i in 1 until timeList.size) {
+//                            sumTime += timeList[i]
+//                        }
+                        timeList.toLongArray().average()
+//
+////                        val resultInfo = "结果是: ${MobileNetClassfiedData.dataList[maxi]}\n"
+                        val timeInfo = "平均耗时:${timeList.toLongArray().average()}ms"
+//
+                        tv_preinfos.text = "" + timeInfo
+
+                        //           dialog.dismiss()
+
+//                        val resultInfos = StringBuilder()
+//                        for (i in result.indices) {
+//                            info { " index: " + i + " value: " + result[i] }
+//                            resultInfos.appendln(" index: $i value: ${result[i]}")
+//                            sum += result[i]
+//                            if (result[i] > max) {
+//                                max = result[i]
+//                                maxi = i
+//                            }
+//                        }
+//                        info { "maxindex: $maxi" }
+//                        info { "max: $max" }
+//                        info { "sum: $sum" }
+//                        var sumTime: Long = 0
+//                        for (i in 1 until timeList.size) {
+//                            sumTime += timeList[i]
+//                        }
+
+//                        val resultInfo = "结果是: ${MobileNetClassfiedData.dataList[maxi]}\n"
+//                        val timeInfo = "运行10次平均耗时:${sumTime / 100L}ms"
+
+                        //   tv_preinfos.text = resultInfo + timeInfo
+//                        tv_preinfos.text = "$timeInfo\n点击查看结果"
+//                        tv_preinfos.setOnClickListener {
+//                            val dialog = MaterialDialog.Builder(this@MainActivity)
+//                                    .title("结果:")
+//                                    .content(timeInfo + "\n" + resultInfos.toString())
+//                                    .show()
+//                        }
+
+                    }
+
+                    override fun onError(e: Throwable) {
+                        isbusy = false
+                    }
+
+                    override fun onComplete() {
+                        isbusy = false
+                        tv_infos.text = ""
                     }
                 })
     }

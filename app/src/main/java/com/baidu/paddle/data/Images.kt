@@ -76,3 +76,27 @@ val tempImage: File
         return tempFile
     }
 
+
+fun getApplen(n:Int): File{
+
+    val assetPath = "pml_demo"
+    val imagePath = (Environment.getExternalStorageDirectory().toString()
+            + File.separator + assetPath)
+    val tempFile = File(imagePath, "apple的副本 $n.jpg")
+    try {
+        tempFile.createNewFile()
+    } catch (e: IOException) {
+        e.printStackTrace()
+    }
+
+    return tempFile
+}
+
+val pathList: ArrayList<String>  by lazy {
+   val arr =  ArrayList<String>()
+    for (i in 1..100){
+        arr.add(getApplen(i).absolutePath)
+    }
+    arr
+}
+

@@ -4,9 +4,13 @@ object LoaderFactory {
     fun buildLoader(type: ModelType): ModelLoader = when (type) {
         ModelType.mobilenet -> MobileNetModelLoaderImpl()
         ModelType.googlenet -> GoogleNetModelLoaderImpl()
-        ModelType.mobilenet_ssd -> MobileNetSSDCombinedModelLoaderImpl()
+        ModelType.mobilenet_ssd_gesture -> MobileNetSSDCombinedModelLoaderImpl()
         ModelType.mobilenet_combined -> MobileNetModelLoaderCombinedImpl()
         ModelType.mobilenet_combined_qualified -> MobileNetModelLoaderCombinedQualifiedImpl()
-        else -> MobileNetModelLoaderImpl()
+        ModelType.googlenet_combine_quali -> GoogleNetModelCombinedQualiLoaderImpl()
+        ModelType.genet_combine -> GEnetModelLoaderCombinedImpl()
+        else -> {
+            throw IllegalAccessException("load unregisted model")
+        }
     }
 }

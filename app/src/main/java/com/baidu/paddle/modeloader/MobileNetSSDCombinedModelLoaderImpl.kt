@@ -14,7 +14,7 @@ import java.io.File
 
 class MobileNetSSDCombinedModelLoaderImpl : ModelLoader() {
 
-    private var type = ModelType.mobilenet_ssd
+    private var type = ModelType.mobilenet_ssd_gesture
     // mobile net is bgr
     private val means = floatArrayOf(127.5f, 127.5f, 127.5f)
     private val ddims = intArrayOf(1, 3, 300, 300)
