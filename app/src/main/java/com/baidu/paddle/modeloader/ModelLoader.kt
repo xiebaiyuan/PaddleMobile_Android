@@ -7,15 +7,19 @@ import android.support.v7.widget.AppCompatImageView
 import android.util.Log
 import com.baidu.paddle.PML
 import org.jetbrains.anko.AnkoLogger
-import java.util.logging.Logger
+import org.jetbrains.anko.info
 
 
 /**
  * Created by xiebaiyuan on 2018/7/18.
  */
 
-abstract class ModelLoader : IModelLoader,AnkoLogger {
+abstract class ModelLoader : IModelLoader, AnkoLogger {
     var predictImageTime: Long = -1
+    var isbusy = false
+    var timeList: MutableList<Long> = ArrayList()
+    var timeInfo: String = ""
+    var mTimes: Long = 1
 
     /**
      * 将图片按照指定尺寸压好,将像素按照rs gs bs排列
@@ -78,7 +82,63 @@ abstract class ModelLoader : IModelLoader,AnkoLogger {
         PML.setThread(mThreadCounts)
     }
 
-    override fun mixResult(showView: AppCompatImageView, predicted: Pair<FloatArray, Bitmap>){
+    override fun mixResult(showView: AppCompatImageView, predicted: Pair<FloatArray, Bitmap>) {
         // empty impl
+    }
+
+    override fun processInfo(result: FloatArray): String? {
+        info { "result.length: " + result.size }
+
+        getTimeInfo()
+
+        var max = java.lang.Float.MIN_VALUE
+        var maxi = -1
+        var sum = 0f
+
+        for (i in result.indices) {
+            info { " index: " + i + " value: " + result[i] }
+            sum += result[i]
+            if (result[i] > max) {
+                max = result[i]
+                maxi = i
+            }
+        }
+        info { "maxindex: $maxi" }
+        info { "max: $max" }
+        info { "sum: $sum" }
+
+
+        val resultInfos = StringBuilder()
+        for (i in 0..Math.min(1000, result.size - 1)) {
+            info { " index: " + i + " value: " + result[i] }
+            resultInfos.appendln(" index: $i value: ${result[i]}")
+            sum += result[i]
+            if (result[i] > max) {
+                max = result[i]
+                maxi = i
+            }
+        }
+
+        info { "maxindex: $maxi" }
+        info { "max: $max" }
+        info { "sum: $sum" }
+
+
+        return "$timeInfo\n" + "  result.size: ${result.size}\n" + " ${resultInfos}"
+    }
+
+    private fun getTimeInfo() {
+        timeList.removeAt(0)
+        timeInfo = "运算$mTimes 次平均时间: ${timeList.average()}ms\n最小时间: ${timeList.min()}ms \n最大时间: ${timeList.max()}ms "
+        info { timeInfo }
+        timeList.clear()
+    }
+
+    fun clearTimeList() {
+        timeList.clear()
+    }
+
+    fun predictTimes(times: Long) {
+        mTimes = times;
     }
 }

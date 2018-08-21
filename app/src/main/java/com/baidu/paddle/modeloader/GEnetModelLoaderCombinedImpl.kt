@@ -77,8 +77,8 @@ class GEnetModelLoaderCombinedImpl : ModelLoader() {
         val sdcardPath = (Environment.getExternalStorageDirectory().toString()
                 + File.separator + assetPath + File.separator + type)
 
-        val modelPath = sdcardPath + File.separator + "model"
-  //      val modelPath = sdcardPath + File.separator + "genetmodel.mlm"
+//        val modelPath = sdcardPath + File.separator + "model"
+        val modelPath = sdcardPath + File.separator + "genetmodel.mlm"
         val paramsPath = sdcardPath + File.separator + "params"
 
         Log.d("pml", "loadpath : $sdcardPath")
@@ -86,8 +86,8 @@ class GEnetModelLoaderCombinedImpl : ModelLoader() {
         Log.d("pml", "paramsPath : $paramsPath")
 
         val key =  "#w\$`-3>Yyzue5f%3a3zY@_)wYZ1&c5Nlh#lUmy+K+;O7uqMRra";
-        // PML.loadCombinedEncrypt(modelPath, paramsPath,key)
-        PML.loadCombined(modelPath, paramsPath)
+         PML.loadCombinedEncrypt(modelPath, paramsPath,key)
+        //PML.loadCombined(modelPath, paramsPath)
     }
 
     override fun predictImage(inputBuf: FloatArray): FloatArray? {

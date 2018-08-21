@@ -25,4 +25,5 @@ interface IModelLoader {
 
     fun setThreadCount(mThreadCounts: Int)
 
+    fun processInfo(result: FloatArray): String?
 }
