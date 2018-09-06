@@ -20,7 +20,7 @@ abstract class ModelLoader : IModelLoader, AnkoLogger {
     var timeList: MutableList<Long> = ArrayList()
     var timeInfo: String = ""
     var mTimes: Long = 1
-
+    var showAllresult =false
     /**
      * 将图片按照指定尺寸压好,将像素按照rs gs bs排列
      */
@@ -111,7 +111,9 @@ abstract class ModelLoader : IModelLoader, AnkoLogger {
         val resultInfos = StringBuilder()
         for (i in 0..Math.min(1000, result.size - 1)) {
             info { " index: " + i + " value: " + result[i] }
-            resultInfos.appendln(" index: $i value: ${result[i]}")
+            if (showAllresult) {
+                resultInfos.appendln(" index: $i value: ${result[i]}")
+            }
             sum += result[i]
             if (result[i] > max) {
                 max = result[i]
@@ -124,12 +126,13 @@ abstract class ModelLoader : IModelLoader, AnkoLogger {
         info { "sum: $sum" }
 
 
-        return "$timeInfo\n" + "  result.size: ${result.size}\n" + " ${resultInfos}"
+        return "$timeInfo\n" + "result.size: ${result.size}\n" + "${resultInfos}\n"
     }
 
     private fun getTimeInfo() {
-        timeList.removeAt(0)
-        timeInfo = "运算$mTimes 次平均时间: ${timeList.average()}ms\n最小时间: ${timeList.min()}ms \n最大时间: ${timeList.max()}ms "
+//        timeList.subList(10,timeList.size)
+
+        timeInfo = "运算$mTimes 次平均时间: ${timeList.average()}ms\n最小时间: ${timeList.min()}ms \n最大时间: ${timeList.max()}ms \n所有时间信息:${timeList}"
         info { timeInfo }
         timeList.clear()
     }

@@ -8,6 +8,7 @@ import android.os.Environment
 import android.support.v7.widget.AppCompatImageView
 import android.util.Log
 import com.baidu.paddle.PML
+import org.jetbrains.anko.info
 import java.io.File
 
 
@@ -89,6 +90,69 @@ class GoogleNetModelCombinedLoaderImpl : ModelLoader() {
 
 
         return result
+    }
+    override fun mixResult(showView: AppCompatImageView, predicted: Pair<FloatArray, Bitmap>) {
+
+
+        val src = predicted.second
+        val floats = predicted.first
+
+        val w = showView.width
+        val h = showView.height
+
+        val paint = Paint()
+        paint.color = Color.RED
+        paint.style = Paint.Style.STROKE
+        paint.strokeWidth = 3.0f
+
+        //create the new blank bitmap
+        val newb = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888)//创建一个新的和SRC长度宽度一样的位图
+        val cv = Canvas(newb)
+        //draw src into
+        cv.drawBitmap(src, 0f, 0f, null)//在 0，0坐标开始画入src
+        // l t r b
+//        val l: Float = floats[0]*w
+//        val t: Float = floats[1]*h
+//
+//        val r: Float = floats[2]*w
+//        val b: Float = floats[3]*h
+//
+
+        var x1 = 0f
+        var x2 = 0f
+        var y1 = 0f
+        var y2 = 0f
+
+        // the googlenet result sequence is (left top right top bottom)
+        x1 = floats[0] * showView.width / 224
+        y1 = floats[1] * showView.height / 224
+        x2 = floats[2] * showView.width / 224
+        y2 = floats[3] * showView.height / 224
+
+
+
+
+//
+//        info {
+//            "l= $l r= $r t= $t b= $b "
+//        }
+        info {
+            " bitmap.width = ${newb.width}  " +
+                    " bitmap.height = ${newb.height} " +
+                    " showView.width = ${showView.width} " +
+                    " showView.height = ${showView.height}  "
+        }
+        cv.drawRect(x1, y1, x2, y2, paint)
+
+//        cv.drawRect(l, t, r, b, paint)
+
+        //save all clip
+        cv.save(Canvas.ALL_SAVE_FLAG)//保存
+        //store
+        cv.restore()//存储
+
+        showView.setImageBitmap(newb)
+        super.mixResult(showView, predicted)
     }
 
 //    override fun mixResult(canvas: AppCompatImageView, predicted: Pair<FloatArray, Bitmap>, viewWidth: Int, viewHeight: Int) {

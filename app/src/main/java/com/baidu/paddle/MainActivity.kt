@@ -27,6 +27,7 @@ import android.os.Bundle
 import android.os.Environment
 import android.provider.MediaStore
 import android.support.v4.content.FileProvider
+import android.text.InputType
 import android.widget.Toast
 import com.afollestad.materialdialogs.MaterialDialog
 import com.baidu.paddle.data.banana
@@ -51,23 +52,25 @@ class MainActivity : Activity(), AnkoLogger {
 
     private lateinit var mModelLoader: ModelLoader
 
-    private var mCurrentType = ModelType.genet_combine
     private var mThreadCounts = 1
-    val modelList: ArrayList<ModelType> by lazy {
+    private var mPredictCounts = 10L
+    private val modelList: ArrayList<ModelType> by lazy {
         val list = ArrayList<ModelType>()
-        list.add(ModelType.mobilenet)
-        list.add(ModelType.googlenet)
-        list.add(ModelType.mobilenet_combined)
-        list.add(ModelType.mobilenet_combined_qualified)
-        list.add(ModelType.mobilenet_ssd_gesture)
+//        list.add(ModelType.mobilenet)
+//        list.add(ModelType.mobilenet_combined)
+//        list.add(ModelType.googlenet_combine)
+//        list.add(ModelType.mobilenet_combined_qualified)
         list.add(ModelType.genet_combine)
+        list.add(ModelType.mobilenet_ssd_gesture)
         list
     }
+    private var mCurrentType = modelList[0]
+
 
     val threadCountList: ArrayList<Int> by lazy {
         Runtime.getRuntime().availableProcessors()
         val list = ArrayList<Int>()
-        for (i in (1..Runtime.getRuntime().availableProcessors()/2)) {
+        for (i in (1..Runtime.getRuntime().availableProcessors() / 2)) {
             list.add(i)
         }
 //        list.add(1)
@@ -117,7 +120,7 @@ class MainActivity : Activity(), AnkoLogger {
         mCurrentPath = banana.absolutePath
         predict_banada.setOnClickListener {
 
-            scaleImageAndPredictImage(mCurrentPath, 10)
+            scaleImageAndPredictImage(mCurrentPath, mPredictCounts)
 
         }
         btn_takephoto.setOnClickListener {
@@ -173,6 +176,22 @@ class MainActivity : Activity(), AnkoLogger {
                         true
                     }
                     .positiveText("确定")
+                    .show()
+        }
+
+        runcount_counts.text = "$mPredictCounts"
+
+        ll_runcount.setOnClickListener {
+
+            MaterialDialog.Builder(this)
+                    .inputType(InputType.TYPE_CLASS_NUMBER)
+                    .input("设置预测次数","10") { _, input ->
+                        mPredictCounts = input.toString().toLong()
+                        info { "mRunCount=$mPredictCounts" }
+                        mModelLoader.mTimes = mPredictCounts
+                        reloadModel()
+                        runcount_counts.text = "$mPredictCounts"
+                    }.inputRange(1,3)
                     .show()
         }
     }
@@ -288,7 +307,7 @@ class MainActivity : Activity(), AnkoLogger {
             return
         }
         mModelLoader.clearTimeList()
-        tv_infos.text = "运算中..."
+        tv_infos.text = "预处理数据,预热10次,执行运算..."
         mModelLoader.predictTimes(times)
 //        val dialog = MaterialDialog.Builder(this)
 //                .title("运算中")
@@ -311,10 +330,19 @@ class MainActivity : Activity(), AnkoLogger {
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .doOnNext { bitmap -> show_image.setImageBitmap(bitmap) }
+//                .doOnNext {
+//                    for (i in 0..9) {
+//                        //预热10次
+//                        mModelLoader.predictImage(it)
+//                    }
+//                }
+//                .doOnNext {
+//                    tv_infos.text = "预热10次完成,运算中..."
+//                }
                 //  .observeOn(Schedulers.io())
                 .map { bitmap ->
                     var floatsTen: FloatArray? = null
-                    for (i in 0..(times)) {
+                    for (i in 0..(times - 1)) {
                         val floats = mModelLoader.predictImage(bitmap)
                         val predictImageTime = mModelLoader.predictImageTime
                         mModelLoader.timeList.add(predictImageTime)

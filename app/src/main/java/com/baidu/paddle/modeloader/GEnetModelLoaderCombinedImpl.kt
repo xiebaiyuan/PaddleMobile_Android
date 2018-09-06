@@ -77,8 +77,8 @@ class GEnetModelLoaderCombinedImpl : ModelLoader() {
         val sdcardPath = (Environment.getExternalStorageDirectory().toString()
                 + File.separator + assetPath + File.separator + type)
 
-//        val modelPath = sdcardPath + File.separator + "model"
-        val modelPath = sdcardPath + File.separator + "genetmodel.mlm"
+        val modelPath = sdcardPath + File.separator + "model"
+//        val modelPath = sdcardPath + File.separator + "genetmodel.mlm"
         val paramsPath = sdcardPath + File.separator + "params"
 
         Log.d("pml", "loadpath : $sdcardPath")
@@ -86,8 +86,8 @@ class GEnetModelLoaderCombinedImpl : ModelLoader() {
         Log.d("pml", "paramsPath : $paramsPath")
 
         val key =  "#w\$`-3>Yyzue5f%3a3zY@_)wYZ1&c5Nlh#lUmy+K+;O7uqMRra";
-         PML.loadCombinedEncrypt(modelPath, paramsPath,key)
-        //PML.loadCombined(modelPath, paramsPath)
+//         PML.loadCombinedEncrypt(modelPath, paramsPath,key)
+        PML.loadCombined(modelPath, paramsPath)
     }
 
     override fun predictImage(inputBuf: FloatArray): FloatArray? {
@@ -107,46 +107,46 @@ class GEnetModelLoaderCombinedImpl : ModelLoader() {
     }
 
     override fun mixResult(showView: AppCompatImageView, predicted: Pair<FloatArray, Bitmap>) {
-        val src = predicted.second
-        val floats = predicted.first
-
-        val w = showView.width
-        val h = showView.height
-
-        val paint = Paint()
-        paint.color = Color.RED
-        paint.style = Paint.Style.STROKE
-        paint.strokeWidth = 3.0f
-
-        //create the new blank bitmap
-        val newb = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888)//创建一个新的和SRC长度宽度一样的位图
-        val cv = Canvas(newb)
-        //draw src into
-        cv.drawBitmap(src, 0f, 0f, null)//在 0，0坐标开始画入src
-        // l r t b
-        val l: Float = floats[0] * w
-        val r: Float = floats[1] * w
-
-        val t: Float = floats[2] * h
-        val b: Float = floats[3] * h
-        info {
-            "l= $l r= $r t= $t b= $b "
-        }
-        info {
-            " bitmap.width = ${newb.width}  " +
-                    " bitmap.height = ${newb.height} " +
-                    " showView.width = ${showView.width} " +
-                    " showView.height = ${showView.height}  "
-        }
-
-        cv.drawRect(l, t, r, b, paint)
-
-        //save all clip
-        cv.save(Canvas.ALL_SAVE_FLAG)//保存
-        //store
-        cv.restore()//存储
-
-        showView.setImageBitmap(newb)
+//        val src = predicted.second
+//        val floats = predicted.first
+//
+//        val w = showView.width
+//        val h = showView.height
+//
+//        val paint = Paint()
+//        paint.color = Color.RED
+//        paint.style = Paint.Style.STROKE
+//        paint.strokeWidth = 3.0f
+//
+//        //create the new blank bitmap
+//        val newb = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888)//创建一个新的和SRC长度宽度一样的位图
+//        val cv = Canvas(newb)
+//        //draw src into
+//        cv.drawBitmap(src, 0f, 0f, null)//在 0，0坐标开始画入src
+//        // l r t b
+//        val l: Float = floats[0] * w
+//        val r: Float = floats[1] * w
+//
+//        val t: Float = floats[2] * h
+//        val b: Float = floats[3] * h
+//        info {
+//            "l= $l r= $r t= $t b= $b "
+//        }
+//        info {
+//            " bitmap.width = ${newb.width}  " +
+//                    " bitmap.height = ${newb.height} " +
+//                    " showView.width = ${showView.width} " +
+//                    " showView.height = ${showView.height}  "
+//        }
+//
+//        cv.drawRect(l, t, r, b, paint)
+//
+//        //save all clip
+//        cv.save(Canvas.ALL_SAVE_FLAG)//保存
+//        //store
+//        cv.restore()//存储
+//
+//        showView.setImageBitmap(newb)
 
 //        try {
 //            val bitmap = predicted.second

@@ -9,6 +9,7 @@ object LoaderFactory {
         ModelType.mobilenet_combined_qualified -> MobileNetModelLoaderCombinedQualifiedImpl()
         ModelType.googlenet_combine_quali -> GoogleNetModelCombinedQualiLoaderImpl()
         ModelType.genet_combine -> GEnetModelLoaderCombinedImpl()
+        ModelType.googlenet_combine -> GoogleNetModelCombinedLoaderImpl()
         else -> {
             throw IllegalAccessException("load unregisted model")
         }
